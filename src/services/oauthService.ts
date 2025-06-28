@@ -45,26 +45,35 @@ const getOAuthConfigs = (): Record<string, OAuthConfig> => {
 };
 
 export const initiateOAuth = (platform: string) => {
+  console.log(`Initiating OAuth for platform: ${platform}`);
   const configs = getOAuthConfigs();
   const config = configs[platform];
   
   if (!config) {
+    console.error(`OAuth configuration not found for platform: ${platform}`);
     throw new Error(`OAuth configuration not found for platform: ${platform}`);
   }
 
   if (!config.enabled) {
+    console.error(`${platform} integration is not enabled yet`);
     throw new Error(`${platform} integration is coming soon!`);
   }
 
+  const state = `${platform}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   const params = new URLSearchParams({
     client_id: config.clientId,
     redirect_uri: config.redirectUri,
     scope: config.scopes.join(' '),
     response_type: 'code',
-    state: `${platform}_${Date.now()}`
+    state: state
   });
 
   const authUrl = `${config.authUrl}?${params.toString()}`;
+  console.log(`Redirecting to OAuth URL: ${authUrl}`);
+  
+  // Store the state for verification when the user returns
+  localStorage.setItem(`oauth_state_${platform}`, state);
+  
   window.location.href = authUrl;
 };
 
@@ -76,8 +85,13 @@ export const saveAdAccount = async (
   refreshToken?: string,
   expiresAt?: Date
 ) => {
+  console.log(`Saving ad account for platform: ${platform}`);
+  
   const { data: user } = await supabase.auth.getUser();
-  if (!user.user) throw new Error('User not authenticated');
+  if (!user.user) {
+    console.error('User not authenticated when trying to save ad account');
+    throw new Error('User not authenticated');
+  }
 
   const { data, error } = await supabase
     .from('ad_accounts')
@@ -90,13 +104,46 @@ export const saveAdAccount = async (
       refresh_token: refreshToken,
       token_expires_at: expiresAt?.toISOString(),
       is_active: true
+    }, {
+      onConflict: 'user_id,platform,account_id'
     });
 
-  if (error) throw error;
+  if (error) {
+    console.error('Error saving ad account:', error);
+    throw error;
+  }
+  
+  console.log('Ad account saved successfully:', data);
   return data;
 };
 
 export const isPlatformEnabled = (platform: string): boolean => {
   const configs = getOAuthConfigs();
-  return configs[platform]?.enabled || false;
+  const enabled = configs[platform]?.enabled || false;
+  console.log(`Platform ${platform} enabled: ${enabled}`);
+  return enabled;
+};
+
+export const getConnectedAccounts = async () => {
+  console.log('Fetching connected accounts');
+  
+  const { data: user } = await supabase.auth.getUser();
+  if (!user.user) {
+    console.error('User not authenticated when fetching connected accounts');
+    throw new Error('User not authenticated');
+  }
+
+  const { data, error } = await supabase
+    .from('ad_accounts')
+    .select('*')
+    .eq('user_id', user.user.id)
+    .eq('is_active', true);
+
+  if (error) {
+    console.error('Error fetching connected accounts:', error);
+    throw error;
+  }
+
+  console.log('Connected accounts fetched:', data);
+  return data || [];
 };

@@ -11,25 +11,44 @@ const OAuthCallback = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
+  const [message, setMessage] = useState('Processing your connection...');
 
   useEffect(() => {
     const handleOAuthCallback = async () => {
       try {
+        console.log('OAuth callback initiated');
         const code = searchParams.get('code');
         const state = searchParams.get('state');
         const error = searchParams.get('error');
+        const errorDescription = searchParams.get('error_description');
+
+        console.log('OAuth callback params:', { code: !!code, state, error, errorDescription });
 
         if (error) {
-          throw new Error(`OAuth error: ${error}`);
+          console.error('OAuth error:', error, errorDescription);
+          throw new Error(`OAuth error: ${error} - ${errorDescription || 'Authentication failed'}`);
         }
 
         if (!code || !state) {
+          console.error('Missing required OAuth parameters');
           throw new Error('Missing authorization code or state parameter');
         }
 
-        // Parse platform from state
+        // Parse platform from state and verify it
         const platform = state.split('_')[0];
+        const storedState = localStorage.getItem(`oauth_state_${platform}`);
         
+        if (!storedState || storedState !== state) {
+          console.error('State verification failed');
+          throw new Error('Invalid state parameter - possible CSRF attack');
+        }
+
+        // Clean up stored state
+        localStorage.removeItem(`oauth_state_${platform}`);
+        
+        console.log(`Processing OAuth callback for platform: ${platform}`);
+        setMessage(`Connecting your ${platform.replace('_', ' ')} account...`);
+
         if (platform === 'google_ads') {
           await handleGoogleAdsCallback(code);
         } else if (platform === 'linkedin_ads') {
@@ -39,6 +58,8 @@ const OAuthCallback = () => {
         }
 
         setStatus('success');
+        setMessage('Account connected successfully!');
+        
         toast({
           title: "Account Connected Successfully! 🎉",
           description: `Your ${platform.replace('_', ' ')} account has been connected and is ready to use.`,
@@ -52,6 +73,8 @@ const OAuthCallback = () => {
       } catch (error: any) {
         console.error('OAuth callback error:', error);
         setStatus('error');
+        setMessage(error.message || 'Failed to connect your account');
+        
         toast({
           title: "Connection Failed",
           description: error.message || "Failed to connect your account. Please try again.",
@@ -69,8 +92,10 @@ const OAuthCallback = () => {
   }, [searchParams, navigate, toast]);
 
   const handleGoogleAdsCallback = async (code: string) => {
-    // In a real implementation, you'd exchange the code for tokens
-    // For now, we'll simulate a successful connection
+    console.log('Processing Google Ads callback');
+    
+    // In a real implementation, you'd exchange the code for tokens via your backend
+    // For now, we'll simulate a successful connection with mock data
     const mockAccountData = {
       account_id: 'gads_' + Math.random().toString(36).substr(2, 9),
       account_name: 'Google Ads Account',
@@ -87,10 +112,15 @@ const OAuthCallback = () => {
       mockAccountData.refresh_token,
       mockAccountData.expires_at
     );
+    
+    console.log('Google Ads account saved successfully');
   };
 
   const handleLinkedInCallback = async (code: string) => {
-    // Similar implementation for LinkedIn
+    console.log('Processing LinkedIn Ads callback');
+    
+    // In a real implementation, you'd exchange the code for tokens via your backend
+    // For now, we'll simulate a successful connection with mock data
     const mockAccountData = {
       account_id: 'lnkd_' + Math.random().toString(36).substr(2, 9),
       account_name: 'LinkedIn Ads Account',
@@ -103,16 +133,18 @@ const OAuthCallback = () => {
       mockAccountData.account_name,
       mockAccountData.access_token
     );
+    
+    console.log('LinkedIn Ads account saved successfully');
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
-      <div className="text-center">
+      <div className="text-center max-w-md mx-auto p-6">
         {status === 'processing' && (
           <div className="space-y-4">
             <Loader2 className="h-12 w-12 animate-spin mx-auto text-blue-600" />
-            <h2 className="text-2xl font-bold text-gray-900">Connecting Your Account...</h2>
-            <p className="text-gray-600">Please wait while we set up your ad account connection.</p>
+            <h2 className="text-2xl font-bold text-gray-900">Connecting Your Account</h2>
+            <p className="text-gray-600">{message}</p>
           </div>
         )}
         
@@ -121,8 +153,9 @@ const OAuthCallback = () => {
             <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center mx-auto">
               <span className="text-2xl">✅</span>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900">Account Connected Successfully!</h2>
-            <p className="text-gray-600">Redirecting you back to settings...</p>
+            <h2 className="text-2xl font-bold text-gray-900">Success!</h2>
+            <p className="text-gray-600">{message}</p>
+            <p className="text-sm text-gray-500">Redirecting you back to settings...</p>
           </div>
         )}
         
@@ -132,7 +165,8 @@ const OAuthCallback = () => {
               <span className="text-2xl">❌</span>
             </div>
             <h2 className="text-2xl font-bold text-gray-900">Connection Failed</h2>
-            <p className="text-gray-600">We'll redirect you back to settings to try again.</p>
+            <p className="text-gray-600">{message}</p>
+            <p className="text-sm text-gray-500">We'll redirect you back to settings to try again.</p>
           </div>
         )}
       </div>

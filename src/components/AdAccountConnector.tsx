@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Plus, Loader2, Clock } from "lucide-react";
+import { Check, Plus, Loader2, Clock, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { initiateOAuth, isPlatformEnabled } from "@/services/oauthService";
@@ -59,8 +59,13 @@ const AdAccountConnector = () => {
 
   const loadConnectedAccounts = async () => {
     try {
+      console.log('Loading connected accounts...');
       const { data: user } = await supabase.auth.getUser();
-      if (!user.user) return;
+      if (!user.user) {
+        console.log('No authenticated user found');
+        setLoading(false);
+        return;
+      }
 
       const { data, error } = await supabase
         .from('ad_accounts')
@@ -68,7 +73,12 @@ const AdAccountConnector = () => {
         .eq('user_id', user.user.id)
         .eq('is_active', true);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading connected accounts:', error);
+        throw error;
+      }
+      
+      console.log('Connected accounts loaded:', data);
       setConnectedAccounts(data || []);
     } catch (error: any) {
       console.error('Failed to load connected accounts:', error);
@@ -83,6 +93,8 @@ const AdAccountConnector = () => {
   };
 
   const handleConnect = async (platformKey: string) => {
+    console.log(`Attempting to connect platform: ${platformKey}`);
+    
     if (!isPlatformEnabled(platformKey)) {
       toast({
         title: "Coming Soon! 🚀",
@@ -107,6 +119,12 @@ const AdAccountConnector = () => {
     }
   };
 
+  const handleRefresh = () => {
+    console.log('Refreshing connected accounts...');
+    setLoading(true);
+    loadConnectedAccounts();
+  };
+
   const isConnected = (platformKey: string) => {
     return connectedAccounts.some(account => account.platform === platformKey);
   };
@@ -118,15 +136,15 @@ const AdAccountConnector = () => {
     if (!isPlatformEnabled(platformKey)) {
       return { status: 'coming_soon', label: 'Coming Soon', variant: 'outline' as const, className: 'bg-yellow-50 text-yellow-700 border-yellow-200' };
     }
-    return { status: 'available', label: 'Not Connected', variant: 'outline' as const, className: '' };
+    return { status: 'available', label: 'Available', variant: 'outline' as const, className: '' };
   };
 
   if (loading) {
     return (
       <Card>
         <CardContent className="flex items-center justify-center p-6">
-          <Loader2 className="h-6 w-6 animate-spin" />
-          <span className="ml-2">Loading connected accounts...</span>
+          <Loader2 className="h-6 w-6 animate-spin mr-2" />
+          <span>Loading connected accounts...</span>
         </CardContent>
       </Card>
     );
@@ -135,8 +153,16 @@ const AdAccountConnector = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Connected Ad Accounts</CardTitle>
-        <p className="text-sm text-gray-600">Connect your advertising accounts to generate reports</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Connected Ad Accounts</CardTitle>
+            <p className="text-sm text-gray-600 mt-1">Connect your advertising accounts to generate comprehensive reports</p>
+          </div>
+          <Button variant="outline" size="sm" onClick={handleRefresh}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -145,14 +171,14 @@ const AdAccountConnector = () => {
             const enabled = isPlatformEnabled(platform.key);
             
             return (
-              <div key={platform.key} className="flex items-center justify-between p-4 border rounded-lg">
+              <div key={platform.key} className="flex items-center justify-between p-4 border rounded-lg hover:shadow-sm transition-shadow">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{platform.icon}</span>
                   <div>
                     <div className="font-semibold">{platform.name}</div>
                     <div className="text-sm text-gray-600">{platform.description}</div>
-                    <div className="text-sm text-gray-600">
-                      <Badge variant={platformStatus.variant} className={`mt-1 ${platformStatus.className}`}>
+                    <div className="mt-1">
+                      <Badge variant={platformStatus.variant} className={platformStatus.className}>
                         {platformStatus.status === 'connected' && <Check className="h-3 w-3 mr-1" />}
                         {platformStatus.status === 'coming_soon' && <Clock className="h-3 w-3 mr-1" />}
                         {platformStatus.label}
@@ -191,12 +217,12 @@ const AdAccountConnector = () => {
         {connectedAccounts.length > 0 && (
           <div className="mt-6 p-4 bg-green-50 rounded-lg">
             <h4 className="font-semibold text-green-900 mb-2">
-              Connected Accounts ({connectedAccounts.length})
+              🎉 Connected Accounts ({connectedAccounts.length})
             </h4>
             <div className="space-y-2">
               {connectedAccounts.map((account) => (
                 <div key={account.id} className="flex justify-between items-center text-sm">
-                  <span className="text-green-800">
+                  <span className="text-green-800 font-medium">
                     {platforms.find(p => p.key === account.platform)?.name}: {account.account_name}
                   </span>
                   <span className="text-green-600">
@@ -208,12 +234,12 @@ const AdAccountConnector = () => {
           </div>
         )}
         
-        <div className="text-center mt-6">
-          <p className="text-sm text-gray-500 mb-4">
+        <div className="text-center mt-6 space-y-2">
+          <p className="text-sm text-gray-500">
             🔒 Your data is encrypted and secure. We only access the metrics needed for analysis.
           </p>
           <p className="text-sm text-blue-600">
-            💡 More platforms coming soon! Meta Ads and TikTok Ads integrations are currently in development.
+            💡 Google Ads and LinkedIn Ads are live! Meta Ads and TikTok Ads integrations coming soon.
           </p>
         </div>
       </CardContent>
