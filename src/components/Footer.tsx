@@ -1,3 +1,4 @@
+
 const Footer = () => {
   return (
     <footer className="bg-slate-900 text-white py-12 border-t border-slate-800">
@@ -7,13 +8,9 @@ const Footer = () => {
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center space-x-3 mb-4">
                 <img 
-                  src="/lovable-uploads/f6f14876-9b4b-40dc-a488-05083f14d724.png" 
+                  src="/lovable-uploads/ccada74d-80a1-45de-9c91-c3e558e1ff87.png" 
                   alt="AdPulse Logo" 
-                  className="h-10 w-auto object-contain"
-                  style={{
-                    objectPosition: 'left center',
-                    clipPath: 'inset(15% 5% 15% 5%)'
-                  }}
+                  className="h-12 w-auto object-contain"
                 />
               </div>
               <p className="text-slate-400 mb-4 max-w-md">

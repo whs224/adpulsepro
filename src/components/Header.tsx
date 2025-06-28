@@ -18,13 +18,9 @@ const Header = () => {
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <img 
-              src="/lovable-uploads/f6f14876-9b4b-40dc-a488-05083f14d724.png" 
+              src="/lovable-uploads/ccada74d-80a1-45de-9c91-c3e558e1ff87.png" 
               alt="AdPulse Logo" 
-              className="h-12 w-auto object-contain"
-              style={{
-                objectPosition: 'left center',
-                clipPath: 'inset(15% 5% 15% 5%)'
-              }}
+              className="h-16 w-auto object-contain"
             />
           </div>
           
