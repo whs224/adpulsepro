@@ -15,12 +15,16 @@ const Header = () => {
   return (
     <>
       <header className="fixed top-0 w-full bg-slate-800/95 backdrop-blur-sm border-b border-slate-700 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <img 
               src="/lovable-uploads/f6f14876-9b4b-40dc-a488-05083f14d724.png" 
               alt="AdPulse Logo" 
-              className="h-10 w-auto"
+              className="h-12 w-auto object-contain"
+              style={{
+                objectPosition: 'left center',
+                clipPath: 'inset(15% 5% 15% 5%)'
+              }}
             />
           </div>
           

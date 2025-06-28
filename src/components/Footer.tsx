@@ -1,4 +1,3 @@
-
 const Footer = () => {
   return (
     <footer className="bg-slate-900 text-white py-12 border-t border-slate-800">
@@ -10,7 +9,11 @@ const Footer = () => {
                 <img 
                   src="/lovable-uploads/f6f14876-9b4b-40dc-a488-05083f14d724.png" 
                   alt="AdPulse Logo" 
-                  className="h-8 w-auto"
+                  className="h-10 w-auto object-contain"
+                  style={{
+                    objectPosition: 'left center',
+                    clipPath: 'inset(15% 5% 15% 5%)'
+                  }}
                 />
               </div>
               <p className="text-slate-400 mb-4 max-w-md">
