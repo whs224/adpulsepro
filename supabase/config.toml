@@ -1,1 +1,5 @@
-project_id = "gkhldflxtvrsnidxbqzp"
+
+project_id = "default"
+
+[functions.generate-report]
+verify_jwt = false

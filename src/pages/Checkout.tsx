@@ -1,4 +1,3 @@
-
 import Header from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { CreditCard, Shield, Check } from "lucide-react";
 
 const Checkout = () => {
@@ -27,23 +27,37 @@ const Checkout = () => {
     setLoading(true);
     
     try {
-      // This would integrate with Stripe or your payment processor
       console.log('Processing payment:', paymentData);
       
       // Simulate payment processing
       await new Promise(resolve => setTimeout(resolve, 2000));
       
+      // Generate and send the report
+      const { data, error } = await supabase.functions.invoke('generate-report', {
+        body: {
+          userEmail: paymentData.email,
+          userName: paymentData.name || user?.user_metadata?.full_name || 'Valued Customer',
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      console.log('Report generation response:', data);
+      
       toast({
         title: "Payment Successful!",
-        description: "Your report will be delivered to your email within 24 hours.",
+        description: "Your report is being generated and will be delivered to your email within minutes.",
       });
       
       // Redirect to success page
       window.location.href = '/payment-success';
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Payment or report generation failed:', error);
       toast({
         title: "Payment Failed",
-        description: "Please check your payment details and try again.",
+        description: error.message || "Please check your payment details and try again.",
         variant: "destructive",
       });
     } finally {
@@ -124,7 +138,7 @@ const Checkout = () => {
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Check className="h-4 w-4 text-green-600" />
-                      Delivered within 24 hours
+                      Delivered within minutes
                     </div>
                   </div>
                   
@@ -228,7 +242,7 @@ const Checkout = () => {
                     
                     <div className="pt-4">
                       <Button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-                        {loading ? 'Processing...' : 'Complete Payment - $5.00'}
+                        {loading ? 'Processing Payment & Generating Report...' : 'Complete Payment - $5.00'}
                       </Button>
                     </div>
                     

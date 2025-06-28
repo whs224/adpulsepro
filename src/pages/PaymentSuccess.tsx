@@ -18,7 +18,7 @@ const PaymentSuccess = () => {
                 Payment Successful!
               </h1>
               <p className="text-xl text-gray-600">
-                Thank you for your purchase. Your AdPulse report is being generated.
+                Thank you for your purchase. Your AdPulse report has been generated and sent to your email.
               </p>
             </div>
 
@@ -32,9 +32,9 @@ const PaymentSuccess = () => {
                     <Mail className="h-5 w-5 text-blue-600" />
                   </div>
                   <div className="text-left">
-                    <h3 className="font-semibold mb-1">Email Confirmation</h3>
+                    <h3 className="font-semibold mb-1">Email Delivered</h3>
                     <p className="text-gray-600 text-sm">
-                      You'll receive a confirmation email shortly with your order details.
+                      Your professional PDF report has been sent to your email address. Check your inbox!
                     </p>
                   </div>
                 </div>
@@ -44,16 +44,16 @@ const PaymentSuccess = () => {
                     <Download className="h-5 w-5 text-green-600" />
                   </div>
                   <div className="text-left">
-                    <h3 className="font-semibold mb-1">Report Generation</h3>
+                    <h3 className="font-semibold mb-1">Professional Report</h3>
                     <p className="text-gray-600 text-sm">
-                      Your professional PDF report will be delivered to your email within 24 hours.
+                      Your report includes detailed metrics, AI recommendations, and campaign insights.
                     </p>
                   </div>
                 </div>
                 
                 <div className="pt-4 border-t">
                   <p className="text-sm text-gray-600 mb-4">
-                    Need help or have questions? Contact us at:
+                    Don't see the email? Check your spam folder or contact us:
                   </p>
                   <div className="flex flex-col sm:flex-row gap-2 justify-center">
                     <a href="mailto:contact@adpulse.pro" className="text-blue-600 hover:underline">
