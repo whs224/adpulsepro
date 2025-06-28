@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut, User } from "lucide-react";
 import AuthModal from "./AuthModal";
@@ -12,6 +12,7 @@ const Header = () => {
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const { user, signOut, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleAuthClick = (mode: 'login' | 'signup') => {
     if (user) return;
@@ -26,6 +27,24 @@ const Header = () => {
   const getUserInitials = (name: string | undefined) => {
     if (!name) return 'U';
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
+  const handleNavClick = (path: string) => {
+    if (path.startsWith('#')) {
+      // Handle anchor links for homepage sections
+      if (location.pathname !== '/') {
+        navigate('/');
+        setTimeout(() => {
+          const element = document.querySelector(path);
+          element?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      } else {
+        const element = document.querySelector(path);
+        element?.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      navigate(path);
+    }
   };
 
   if (loading) {
@@ -52,17 +71,56 @@ const Header = () => {
       <header className="fixed top-0 w-full bg-slate-800/95 backdrop-blur-sm border-b border-slate-700 z-50">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <img 
-              src="/lovable-uploads/ccada74d-80a1-45de-9c91-c3e558e1ff87.png" 
-              alt="AdPulse Logo" 
-              className="h-16 w-auto object-contain"
-            />
+            <button onClick={() => navigate('/')}>
+              <img 
+                src="/lovable-uploads/ccada74d-80a1-45de-9c91-c3e558e1ff87.png" 
+                alt="AdPulse Logo" 
+                className="h-16 w-auto object-contain"
+              />
+            </button>
           </div>
           
           <nav className="hidden md:flex items-center space-x-8">
-            <a href="#features" className="text-slate-300 hover:text-white transition-colors">Features</a>
-            <a href="#pricing" className="text-slate-300 hover:text-white transition-colors">Pricing</a>
-            <a href="#how-it-works" className="text-slate-300 hover:text-white transition-colors">How it Works</a>
+            {user && (
+              <button 
+                onClick={() => handleNavClick('/report')}
+                className="text-slate-300 hover:text-white transition-colors"
+              >
+                Report
+              </button>
+            )}
+            <button 
+              onClick={() => handleNavClick('/pricing')}
+              className="text-slate-300 hover:text-white transition-colors"
+            >
+              Pricing
+            </button>
+            <button 
+              onClick={() => handleNavClick('#features')}
+              className="text-slate-300 hover:text-white transition-colors"
+            >
+              Features
+            </button>
+            <button 
+              onClick={() => handleNavClick('#how-it-works')}
+              className="text-slate-300 hover:text-white transition-colors"
+            >
+              How it Works
+            </button>
+            <button 
+              onClick={() => handleNavClick('/faq')}
+              className="text-slate-300 hover:text-white transition-colors"
+            >
+              FAQ
+            </button>
+            {user && (
+              <button 
+                onClick={() => handleNavClick('/settings')}
+                className="text-slate-300 hover:text-white transition-colors"
+              >
+                Settings
+              </button>
+            )}
           </nav>
           
           <div className="flex items-center space-x-4">
