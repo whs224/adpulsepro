@@ -1,10 +1,11 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, Plus, Clock } from "lucide-react";
-import { isPlatformEnabled } from "@/services/oauthService";
+import { isPlatformEnabled, initiateOAuth } from "@/services/oauthService";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const platforms = [
   {
@@ -43,6 +44,8 @@ const platforms = [
 
 const PlatformConnections = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   const handleConnect = (platform: any) => {
     const enabled = isPlatformEnabled(platform.key);
@@ -55,8 +58,26 @@ const PlatformConnections = () => {
       return;
     }
 
-    console.log(`Connecting to ${platform.name}...`);
-    // Platform connection logic will be implemented later
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to connect your ad accounts.",
+      });
+      navigate('/auth');
+      return;
+    }
+
+    try {
+      console.log(`Connecting to ${platform.name}...`);
+      initiateOAuth(platform.key);
+    } catch (error: any) {
+      console.error('OAuth initiation failed:', error);
+      toast({
+        title: "Connection Failed",
+        description: error.message || "Failed to initiate connection. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

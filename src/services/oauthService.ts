@@ -10,7 +10,7 @@ export interface OAuthConfig {
 }
 
 const getOAuthConfigs = (): Record<string, OAuthConfig> => {
-  const baseUrl = window.location.origin;
+  const baseUrl = 'https://adpulse.pro';
   
   return {
     google_ads: {

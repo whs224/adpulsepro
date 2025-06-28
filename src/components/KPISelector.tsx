@@ -1,9 +1,11 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { TrendingUp, Users, DollarSign, Target, MousePointer, Eye } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 const kpiOptions = [
   {
@@ -52,6 +54,9 @@ const kpiOptions = [
 
 const KPISelector = () => {
   const [selectedKPIs, setSelectedKPIs] = useState<string[]>([]);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
 
   const handleKPIToggle = (kpiId: string) => {
     setSelectedKPIs(prev => 
@@ -63,7 +68,34 @@ const KPISelector = () => {
 
   const handleGenerateReport = () => {
     console.log('Generating report with KPIs:', selectedKPIs);
-    // Report generation logic will be implemented with payment integration
+    
+    if (selectedKPIs.length === 0) {
+      toast({
+        title: "Please Select KPIs",
+        description: "You need to select at least one KPI to generate a report.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to generate a report.",
+      });
+      navigate('/auth');
+      return;
+    }
+
+    // Store selected KPIs in localStorage for the report page
+    localStorage.setItem('selectedKPIs', JSON.stringify(selectedKPIs));
+    
+    toast({
+      title: "Redirecting to Report Generation",
+      description: "Taking you to the report page...",
+    });
+    
+    navigate('/report');
   };
 
   return (
