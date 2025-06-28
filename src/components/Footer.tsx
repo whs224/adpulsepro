@@ -1,29 +1,32 @@
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-900 text-white py-12">
+    <footer className="bg-slate-900 text-white py-12 border-t border-slate-800">
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="col-span-1 md:col-span-2">
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg"></div>
-                <span className="text-xl font-bold">AdOptimize</span>
+              <div className="flex items-center space-x-3 mb-4">
+                <img 
+                  src="/lovable-uploads/f6f14876-9b4b-40dc-a488-05083f14d724.png" 
+                  alt="AdPulse Logo" 
+                  className="h-8 w-auto"
+                />
               </div>
-              <p className="text-gray-400 mb-4 max-w-md">
+              <p className="text-slate-400 mb-4 max-w-md">
                 AI-powered ad optimization across Meta, Google, TikTok, and LinkedIn. 
                 Get personalized insights and improve your advertising ROI.
               </p>
               <div className="flex space-x-4">
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">Twitter</a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">LinkedIn</a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">Support</a>
+                <a href="#" className="text-slate-400 hover:text-white transition-colors">Twitter</a>
+                <a href="#" className="text-slate-400 hover:text-white transition-colors">LinkedIn</a>
+                <a href="#" className="text-slate-400 hover:text-white transition-colors">Support</a>
               </div>
             </div>
             
             <div>
-              <h3 className="font-semibold mb-4">Product</h3>
-              <ul className="space-y-2 text-gray-400">
+              <h3 className="font-semibold mb-4 text-white">Product</h3>
+              <ul className="space-y-2 text-slate-400">
                 <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
                 <li><a href="#pricing" className="hover:text-white transition-colors">Pricing</a></li>
                 <li><a href="#how-it-works" className="hover:text-white transition-colors">How it Works</a></li>
@@ -32,8 +35,8 @@ const Footer = () => {
             </div>
             
             <div>
-              <h3 className="font-semibold mb-4">Company</h3>
-              <ul className="space-y-2 text-gray-400">
+              <h3 className="font-semibold mb-4 text-white">Company</h3>
+              <ul className="space-y-2 text-slate-400">
                 <li><a href="#" className="hover:text-white transition-colors">About</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
@@ -42,8 +45,8 @@ const Footer = () => {
             </div>
           </div>
           
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 AdOptimize. All rights reserved.</p>
+          <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400">
+            <p>&copy; 2024 AdPulse. All rights reserved.</p>
           </div>
         </div>
       </div>

@@ -14,30 +14,33 @@ const Header = () => {
 
   return (
     <>
-      <header className="fixed top-0 w-full bg-white/95 backdrop-blur-sm border-b border-gray-200 z-50">
+      <header className="fixed top-0 w-full bg-slate-800/95 backdrop-blur-sm border-b border-slate-700 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg"></div>
-            <span className="text-xl font-bold text-gray-900">AdOptimize</span>
+          <div className="flex items-center space-x-3">
+            <img 
+              src="/lovable-uploads/f6f14876-9b4b-40dc-a488-05083f14d724.png" 
+              alt="AdPulse Logo" 
+              className="h-10 w-auto"
+            />
           </div>
           
           <nav className="hidden md:flex items-center space-x-8">
-            <a href="#features" className="text-gray-600 hover:text-gray-900 transition-colors">Features</a>
-            <a href="#pricing" className="text-gray-600 hover:text-gray-900 transition-colors">Pricing</a>
-            <a href="#how-it-works" className="text-gray-600 hover:text-gray-900 transition-colors">How it Works</a>
+            <a href="#features" className="text-slate-300 hover:text-white transition-colors">Features</a>
+            <a href="#pricing" className="text-slate-300 hover:text-white transition-colors">Pricing</a>
+            <a href="#how-it-works" className="text-slate-300 hover:text-white transition-colors">How it Works</a>
           </nav>
           
           <div className="flex items-center space-x-4">
             <Button 
               variant="ghost" 
               onClick={() => handleAuthClick('login')}
-              className="text-gray-600 hover:text-gray-900"
+              className="text-slate-300 hover:text-white hover:bg-slate-700"
             >
               Login
             </Button>
             <Button 
               onClick={() => handleAuthClick('signup')}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
             >
               Get Started
             </Button>
