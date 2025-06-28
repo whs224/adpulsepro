@@ -94,64 +94,17 @@ const AdAccountConnector = () => {
     setConnecting(platformKey);
     
     try {
-      if (platformKey === 'google_ads' || platformKey === 'linkedin_ads') {
-        // For now, simulate connection for enabled platforms
-        await simulateConnection(platformKey);
-        
-        toast({
-          title: "Account Connected! 🎉",
-          description: `Successfully connected your ${platforms.find(p => p.key === platformKey)?.name} account`,
-        });
-        
-        await loadConnectedAccounts();
-      }
+      // Initiate OAuth flow
+      initiateOAuth(platformKey);
     } catch (error: any) {
+      console.error('OAuth initiation failed:', error);
       toast({
         title: "Connection Failed",
         description: error.message,
         variant: "destructive",
       });
-    } finally {
       setConnecting(null);
     }
-  };
-
-  const simulateConnection = async (platformKey: string) => {
-    // Simulate OAuth flow delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) throw new Error('User not authenticated');
-
-    // Mock account data - in production this would come from the OAuth response
-    const mockAccountData = {
-      google_ads: {
-        account_id: 'gads_' + Math.random().toString(36).substr(2, 9),
-        account_name: 'Main Google Ads Account',
-        access_token: 'mock_google_token_' + Date.now()
-      },
-      linkedin_ads: {
-        account_id: 'lnkd_' + Math.random().toString(36).substr(2, 9),
-        account_name: 'LinkedIn Business Account',
-        access_token: 'mock_linkedin_token_' + Date.now()
-      }
-    };
-
-    const accountData = mockAccountData[platformKey as keyof typeof mockAccountData];
-    if (!accountData) throw new Error('Platform not supported');
-
-    const { error } = await supabase
-      .from('ad_accounts')
-      .insert({
-        user_id: user.user.id,
-        platform: platformKey,
-        account_id: accountData.account_id,
-        account_name: accountData.account_name,
-        access_token: accountData.access_token,
-        is_active: true
-      });
-
-    if (error) throw error;
   };
 
   const isConnected = (platformKey: string) => {
