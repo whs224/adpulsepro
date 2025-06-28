@@ -120,7 +120,7 @@ export const storeCampaignData = async (campaignData: CampaignData[], adAccountI
     campaign_name: campaign.campaignName,
     date_range_start: campaign.dateRange.start,
     date_range_end: campaign.dateRange.end,
-    metrics: campaign.metrics
+    metrics: campaign.metrics as any // Cast to any to match JSONB type
   }));
 
   const { data, error } = await supabase
