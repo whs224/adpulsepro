@@ -17,6 +17,9 @@ const OAuthCallback = () => {
     const handleOAuthCallback = async () => {
       try {
         console.log('OAuth callback initiated');
+        console.log('Full URL:', window.location.href);
+        console.log('Search params:', Object.fromEntries(searchParams.entries()));
+        
         const code = searchParams.get('code');
         const state = searchParams.get('state');
         const error = searchParams.get('error');
@@ -25,29 +28,62 @@ const OAuthCallback = () => {
         console.log('OAuth callback params:', { code: !!code, state, error, errorDescription });
 
         if (error) {
-          console.error('OAuth error:', error, errorDescription);
+          console.error('OAuth error received:', error, errorDescription);
           throw new Error(`OAuth error: ${error} - ${errorDescription || 'Authentication failed'}`);
         }
 
-        if (!code || !state) {
-          console.error('Missing required OAuth parameters');
-          throw new Error('Missing authorization code or state parameter');
+        if (!code) {
+          console.error('No authorization code received');
+          throw new Error('No authorization code received from OAuth provider');
+        }
+
+        if (!state) {
+          console.error('No state parameter received');
+          throw new Error('No state parameter received - security validation failed');
         }
 
         // Parse platform from state and verify it
-        const platform = state.split('_')[0];
+        const stateParts = state.split('_');
+        console.log('State parts:', stateParts);
+        
+        if (stateParts.length < 2) {
+          console.error('Invalid state format:', state);
+          throw new Error('Invalid state parameter format');
+        }
+
+        const platform = stateParts[0];
         const storedState = localStorage.getItem(`oauth_state_${platform}`);
         
-        if (!storedState || storedState !== state) {
+        console.log('Platform extracted:', platform);
+        console.log('Stored state exists:', !!storedState);
+        console.log('State match:', storedState === state);
+
+        if (!storedState) {
+          console.error('No stored state found for platform:', platform);
+          throw new Error('No stored state found - possible session timeout');
+        }
+
+        if (storedState !== state) {
           console.error('State verification failed');
-          throw new Error('Invalid state parameter - possible CSRF attack');
+          console.error('Expected:', storedState);
+          console.error('Received:', state);
+          throw new Error('State verification failed - possible security issue');
         }
 
         // Clean up stored state
         localStorage.removeItem(`oauth_state_${platform}`);
         
-        console.log(`Processing OAuth callback for platform: ${platform}`);
+        console.log(`Processing OAuth callback for platform: ${platform} with code: ${code.substring(0, 10)}...`);
         setMessage(`Connecting your ${platform.replace('_', ' ')} account...`);
+
+        // Check if user is authenticated
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) {
+          console.error('User not authenticated:', userError);
+          throw new Error('Please sign in to your AdPulse account first');
+        }
+
+        console.log('User authenticated:', user.email);
 
         if (platform === 'google_ads') {
           await handleGoogleAdsCallback(code);
@@ -92,10 +128,10 @@ const OAuthCallback = () => {
   }, [searchParams, navigate, toast]);
 
   const handleGoogleAdsCallback = async (code: string) => {
-    console.log('Processing Google Ads callback');
+    console.log('Processing Google Ads callback with code:', code.substring(0, 10) + '...');
     
-    // In a real implementation, you'd exchange the code for tokens via your backend
-    // For now, we'll simulate a successful connection with mock data
+    // TODO: In production, exchange code for tokens via your backend
+    // For now, simulate successful connection with mock data
     const mockAccountData = {
       account_id: 'gads_' + Math.random().toString(36).substr(2, 9),
       account_name: 'Google Ads Account',
@@ -103,6 +139,8 @@ const OAuthCallback = () => {
       refresh_token: 'mock_refresh_token_' + Date.now(),
       expires_at: new Date(Date.now() + 3600000) // 1 hour from now
     };
+
+    console.log('Saving Google Ads account data:', { ...mockAccountData, access_token: 'HIDDEN', refresh_token: 'HIDDEN' });
 
     await saveAdAccount(
       'google_ads',
@@ -117,15 +155,17 @@ const OAuthCallback = () => {
   };
 
   const handleLinkedInCallback = async (code: string) => {
-    console.log('Processing LinkedIn Ads callback');
+    console.log('Processing LinkedIn Ads callback with code:', code.substring(0, 10) + '...');
     
-    // In a real implementation, you'd exchange the code for tokens via your backend
-    // For now, we'll simulate a successful connection with mock data
+    // TODO: In production, exchange code for tokens via your backend
+    // For now, simulate successful connection with mock data
     const mockAccountData = {
       account_id: 'lnkd_' + Math.random().toString(36).substr(2, 9),
       account_name: 'LinkedIn Ads Account',
       access_token: 'mock_linkedin_token_' + Date.now(),
     };
+
+    console.log('Saving LinkedIn Ads account data:', { ...mockAccountData, access_token: 'HIDDEN' });
 
     await saveAdAccount(
       'linkedin_ads',
@@ -145,6 +185,7 @@ const OAuthCallback = () => {
             <Loader2 className="h-12 w-12 animate-spin mx-auto text-blue-600" />
             <h2 className="text-2xl font-bold text-gray-900">Connecting Your Account</h2>
             <p className="text-gray-600">{message}</p>
+            <p className="text-xs text-gray-400">Please wait while we verify your credentials...</p>
           </div>
         )}
         
@@ -167,6 +208,11 @@ const OAuthCallback = () => {
             <h2 className="text-2xl font-bold text-gray-900">Connection Failed</h2>
             <p className="text-gray-600">{message}</p>
             <p className="text-sm text-gray-500">We'll redirect you back to settings to try again.</p>
+            <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
+              <p className="text-xs text-yellow-800">
+                💡 If this keeps happening, check your browser's developer console for detailed error logs.
+              </p>
+            </div>
           </div>
         )}
       </div>
