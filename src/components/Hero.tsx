@@ -1,8 +1,18 @@
-
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BarChart3, DollarSign, Target } from "lucide-react";
+import { ArrowRight, BarChart3, DollarSign, Target, FileText } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
+  const navigate = useNavigate();
+
+  const handleStartOptimizing = () => {
+    navigate('/report');
+  };
+
+  const handleViewExample = () => {
+    navigate('/report');
+  };
+
   return (
     <section className="pt-24 pb-20 bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900">
       <div className="container mx-auto px-4">
@@ -20,11 +30,12 @@ const Hero = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button size="lg" className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-8 py-3">
+            <Button size="lg" onClick={handleStartOptimizing} className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-8 py-3">
               Start Optimizing <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-            <Button size="lg" variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white px-8 py-3">
-              See How It Works
+            <Button size="lg" onClick={handleViewExample} variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white px-8 py-3">
+              <FileText className="mr-2 h-5 w-5" />
+              View Example Report
             </Button>
           </div>
           

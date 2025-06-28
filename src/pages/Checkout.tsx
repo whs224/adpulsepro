@@ -7,11 +7,13 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { CreditCard, Shield, Check } from "lucide-react";
+import { CreditCard, Shield, Check, FileText } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Checkout = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [paymentData, setPaymentData] = useState({
     email: user?.email || '',
@@ -27,13 +29,10 @@ const Checkout = () => {
     setLoading(true);
     
     try {
-      console.log('Processing payment:', paymentData);
+      console.log('Creating Stripe payment session...');
       
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Generate and send the report
-      const { data, error } = await supabase.functions.invoke('generate-report', {
+      // Create Stripe checkout session
+      const { data, error } = await supabase.functions.invoke('create-payment', {
         body: {
           userEmail: paymentData.email,
           userName: paymentData.name || user?.user_metadata?.full_name || 'Valued Customer',
@@ -44,25 +43,29 @@ const Checkout = () => {
         throw error;
       }
 
-      console.log('Report generation response:', data);
+      console.log('Stripe session created:', data);
       
-      toast({
-        title: "Payment Successful!",
-        description: "Your report is being generated and will be delivered to your email within minutes.",
-      });
+      // Redirect to Stripe Checkout
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
       
-      // Redirect to success page
-      window.location.href = '/payment-success';
     } catch (error: any) {
-      console.error('Payment or report generation failed:', error);
+      console.error('Payment creation failed:', error);
       toast({
-        title: "Payment Failed",
-        description: error.message || "Please check your payment details and try again.",
+        title: "Payment Setup Failed",
+        description: error.message || "Unable to create payment session. Please try again.",
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleViewExampleReport = () => {
+    navigate('/report');
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,6 +109,18 @@ const Checkout = () => {
               <p className="text-lg text-gray-600">
                 Get your professional ad performance report for just $5
               </p>
+              
+              {/* Example Report Button */}
+              <div className="mt-6">
+                <Button
+                  onClick={handleViewExampleReport}
+                  variant="outline"
+                  className="inline-flex items-center gap-2"
+                >
+                  <FileText className="h-4 w-4" />
+                  View Example Report
+                </Button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -177,47 +192,7 @@ const Checkout = () => {
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="cardNumber">Card Number</Label>
-                      <Input
-                        id="cardNumber"
-                        name="cardNumber"
-                        value={paymentData.cardNumber}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="1234 5678 9012 3456"
-                        maxLength={19}
-                      />
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="expiryDate">Expiry Date</Label>
-                        <Input
-                          id="expiryDate"
-                          name="expiryDate"
-                          value={paymentData.expiryDate}
-                          onChange={handleInputChange}
-                          required
-                          placeholder="MM/YY"
-                          maxLength={5}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="cvv">CVV</Label>
-                        <Input
-                          id="cvv"
-                          name="cvv"
-                          value={paymentData.cvv}
-                          onChange={handleInputChange}
-                          required
-                          placeholder="123"
-                          maxLength={4}
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Cardholder Name</Label>
+                      <Label htmlFor="name">Full Name</Label>
                       <Input
                         id="name"
                         name="name"
@@ -228,27 +203,15 @@ const Checkout = () => {
                       />
                     </div>
                     
-                    <div className="space-y-2">
-                      <Label htmlFor="zipCode">ZIP Code</Label>
-                      <Input
-                        id="zipCode"
-                        name="zipCode"
-                        value={paymentData.zipCode}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="12345"
-                      />
-                    </div>
-                    
                     <div className="pt-4">
                       <Button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-                        {loading ? 'Processing Payment & Generating Report...' : 'Complete Payment - $5.00'}
+                        {loading ? 'Setting up payment...' : 'Continue to Payment - $5.00'}
                       </Button>
                     </div>
                     
                     <div className="text-center">
                       <p className="text-xs text-gray-500">
-                        🔒 Your payment information is secure and encrypted
+                        🔒 Secure payment powered by Stripe
                       </p>
                     </div>
                   </form>
