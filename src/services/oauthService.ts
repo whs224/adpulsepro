@@ -14,11 +14,11 @@ const getOAuthConfigs = (): Record<string, OAuthConfig> => {
   
   return {
     google_ads: {
-      clientId: "YOUR_GOOGLE_CLIENT_ID", // Please provide this again
+      clientId: "211962165284-laf0vao0gfeqsgtg22josn2n1pq9egg4.apps.googleusercontent.com",
       redirectUri: `${baseUrl}/oauth/google`,
       scopes: ['https://www.googleapis.com/auth/adwords'],
       authUrl: 'https://accounts.google.com/oauth2/auth',
-      enabled: true // Set to true when you provide the credentials
+      enabled: true
     },
     meta_ads: {
       clientId: "YOUR_META_CLIENT_ID",
