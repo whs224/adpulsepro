@@ -9,6 +9,125 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      ad_accounts: {
+        Row: {
+          access_token: string
+          account_id: string
+          account_name: string | null
+          connected_at: string
+          id: string
+          is_active: boolean
+          platform: string
+          refresh_token: string | null
+          token_expires_at: string | null
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          account_id: string
+          account_name?: string | null
+          connected_at?: string
+          id?: string
+          is_active?: boolean
+          platform: string
+          refresh_token?: string | null
+          token_expires_at?: string | null
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          account_id?: string
+          account_name?: string | null
+          connected_at?: string
+          id?: string
+          is_active?: boolean
+          platform?: string
+          refresh_token?: string | null
+          token_expires_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_analysis: {
+        Row: {
+          ai_insights: Json
+          created_at: string
+          date_range_end: string
+          date_range_start: string
+          id: string
+          raw_data: Json
+          recommendations: string[]
+          user_id: string
+        }
+        Insert: {
+          ai_insights: Json
+          created_at?: string
+          date_range_end: string
+          date_range_start: string
+          id?: string
+          raw_data: Json
+          recommendations: string[]
+          user_id: string
+        }
+        Update: {
+          ai_insights?: Json
+          created_at?: string
+          date_range_end?: string
+          date_range_start?: string
+          id?: string
+          raw_data?: Json
+          recommendations?: string[]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      campaign_data: {
+        Row: {
+          ad_account_id: string
+          campaign_id: string
+          campaign_name: string
+          date_range_end: string
+          date_range_start: string
+          fetched_at: string
+          id: string
+          metrics: Json
+          platform: string
+          user_id: string
+        }
+        Insert: {
+          ad_account_id: string
+          campaign_id: string
+          campaign_name: string
+          date_range_end: string
+          date_range_start: string
+          fetched_at?: string
+          id?: string
+          metrics: Json
+          platform: string
+          user_id: string
+        }
+        Update: {
+          ad_account_id?: string
+          campaign_id?: string
+          campaign_name?: string
+          date_range_end?: string
+          date_range_start?: string
+          fetched_at?: string
+          id?: string
+          metrics?: Json
+          platform?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_data_ad_account_id_fkey"
+            columns: ["ad_account_id"]
+            isOneToOne: false
+            referencedRelation: "ad_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null

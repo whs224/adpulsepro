@@ -1,18 +1,16 @@
-
 import Header from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import AdAccountConnector from "@/components/AdAccountConnector";
 
 const Settings = () => {
   const { user } = useAuth();
@@ -22,13 +20,6 @@ const Settings = () => {
     fullName: user?.user_metadata?.full_name || '',
     phone: user?.user_metadata?.phone || '',
     goals: ''
-  });
-
-  const [connectedAccounts, setConnectedAccounts] = useState({
-    googleAds: false,
-    metaAds: false,
-    tiktokAds: false,
-    linkedinAds: false
   });
 
   const [selectedKPIs, setSelectedKPIs] = useState<string[]>([]);
@@ -93,14 +84,6 @@ const Settings = () => {
         variant: "destructive",
       });
     }
-  };
-
-  const handleConnectAccount = (platform: string) => {
-    // This would integrate with actual OAuth flows later
-    toast({
-      title: "Coming Soon",
-      description: `${platform} integration will be available soon!`,
-    });
   };
 
   const handleKPIToggle = (kpiId: string) => {
@@ -196,46 +179,8 @@ const Settings = () => {
                 </CardContent>
               </Card>
 
-              {/* Connected Accounts */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Connected Ad Accounts</CardTitle>
-                  <p className="text-sm text-gray-600">Connect your advertising accounts to generate reports</p>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {[
-                      { key: 'googleAds', name: 'Google Ads', icon: '🔴' },
-                      { key: 'metaAds', name: 'Meta Ads', icon: '🔵' },
-                      { key: 'tiktokAds', name: 'TikTok Ads', icon: '⚫' },
-                      { key: 'linkedinAds', name: 'LinkedIn Ads', icon: '🔷' }
-                    ].map((platform) => (
-                      <div key={platform.key} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <span className="text-2xl">{platform.icon}</span>
-                          <div>
-                            <div className="font-semibold">{platform.name}</div>
-                            <div className="text-sm text-gray-600">
-                              {connectedAccounts[platform.key as keyof typeof connectedAccounts] ? (
-                                <Badge variant="secondary" className="bg-green-100 text-green-800">Connected</Badge>
-                              ) : (
-                                <Badge variant="outline">Not Connected</Badge>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleConnectAccount(platform.name)}
-                        >
-                          {connectedAccounts[platform.key as keyof typeof connectedAccounts] ? 'Reconnect' : 'Connect'}
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Connected Accounts - Use new component */}
+              <AdAccountConnector />
 
               {/* KPI Preferences */}
               <Card>
