@@ -6,6 +6,7 @@ export interface OAuthConfig {
   redirectUri: string;
   scopes: string[];
   authUrl: string;
+  enabled: boolean;
 }
 
 const getOAuthConfigs = (): Record<string, OAuthConfig> => {
@@ -13,28 +14,32 @@ const getOAuthConfigs = (): Record<string, OAuthConfig> => {
   
   return {
     google_ads: {
-      clientId: "YOUR_GOOGLE_CLIENT_ID", // This will need to be configured
+      clientId: "YOUR_GOOGLE_CLIENT_ID", // Please provide this again
       redirectUri: `${baseUrl}/oauth/google`,
       scopes: ['https://www.googleapis.com/auth/adwords'],
-      authUrl: 'https://accounts.google.com/oauth2/auth'
+      authUrl: 'https://accounts.google.com/oauth2/auth',
+      enabled: true // Set to true when you provide the credentials
     },
     meta_ads: {
-      clientId: "YOUR_META_CLIENT_ID", // This will need to be configured
+      clientId: "YOUR_META_CLIENT_ID",
       redirectUri: `${baseUrl}/oauth/meta`,
       scopes: ['ads_read'],
-      authUrl: 'https://www.facebook.com/v18.0/dialog/oauth'
+      authUrl: 'https://www.facebook.com/v18.0/dialog/oauth',
+      enabled: false // Coming soon
     },
     tiktok_ads: {
-      clientId: "YOUR_TIKTOK_CLIENT_ID", // This will need to be configured
+      clientId: "YOUR_TIKTOK_CLIENT_ID",
       redirectUri: `${baseUrl}/oauth/tiktok`,
       scopes: ['advertiser.read'],
-      authUrl: 'https://business-api.tiktok.com/portal/auth'
+      authUrl: 'https://business-api.tiktok.com/portal/auth',
+      enabled: false // Coming soon
     },
     linkedin_ads: {
-      clientId: "YOUR_LINKEDIN_CLIENT_ID", // This will need to be configured
+      clientId: "77sa4cca5uo0vc",
       redirectUri: `${baseUrl}/oauth/linkedin`,
       scopes: ['r_ads', 'r_ads_reporting'],
-      authUrl: 'https://www.linkedin.com/oauth/v2/authorization'
+      authUrl: 'https://www.linkedin.com/oauth/v2/authorization',
+      enabled: true
     }
   };
 };
@@ -47,12 +52,16 @@ export const initiateOAuth = (platform: string) => {
     throw new Error(`OAuth configuration not found for platform: ${platform}`);
   }
 
+  if (!config.enabled) {
+    throw new Error(`${platform} integration is coming soon!`);
+  }
+
   const params = new URLSearchParams({
     client_id: config.clientId,
     redirect_uri: config.redirectUri,
     scope: config.scopes.join(' '),
     response_type: 'code',
-    state: `${platform}_${Date.now()}` // Include platform and timestamp for security
+    state: `${platform}_${Date.now()}`
   });
 
   const authUrl = `${config.authUrl}?${params.toString()}`;
@@ -85,4 +94,9 @@ export const saveAdAccount = async (
 
   if (error) throw error;
   return data;
+};
+
+export const isPlatformEnabled = (platform: string): boolean => {
+  const configs = getOAuthConfigs();
+  return configs[platform]?.enabled || false;
 };

@@ -2,10 +2,13 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Plus } from "lucide-react";
+import { Check, Plus, Clock } from "lucide-react";
+import { isPlatformEnabled } from "@/services/oauthService";
+import { useToast } from "@/hooks/use-toast";
 
 const platforms = [
   {
+    key: "meta_ads",
     name: "Meta Ads",
     description: "Facebook & Instagram advertising",
     icon: "🔵",
@@ -13,6 +16,7 @@ const platforms = [
     color: "blue"
   },
   {
+    key: "google_ads",
     name: "Google Ads",
     description: "Search, Display & YouTube advertising",
     icon: "🔴",
@@ -20,6 +24,7 @@ const platforms = [
     color: "red"
   },
   {
+    key: "tiktok_ads",
     name: "TikTok Ads",
     description: "TikTok for Business advertising",
     icon: "⚫",
@@ -27,6 +32,7 @@ const platforms = [
     color: "gray"
   },
   {
+    key: "linkedin_ads",
     name: "LinkedIn Ads",
     description: "Professional network advertising",
     icon: "🔷",
@@ -36,8 +42,20 @@ const platforms = [
 ];
 
 const PlatformConnections = () => {
-  const handleConnect = (platformName: string) => {
-    console.log(`Connecting to ${platformName}...`);
+  const { toast } = useToast();
+
+  const handleConnect = (platform: any) => {
+    const enabled = isPlatformEnabled(platform.key);
+    
+    if (!enabled) {
+      toast({
+        title: "Coming Soon! 🚀",
+        description: `${platform.name} integration is currently being developed and will be available soon!`,
+      });
+      return;
+    }
+
+    console.log(`Connecting to ${platform.name}...`);
     // Platform connection logic will be implemented later
   };
 
@@ -52,54 +70,79 @@ const PlatformConnections = () => {
             <p className="text-lg text-gray-600">
               Securely connect your advertising accounts to get comprehensive insights
             </p>
+            <p className="text-sm text-blue-600 mt-2">
+              🚀 Google Ads and LinkedIn Ads available now • Meta Ads and TikTok Ads coming soon!
+            </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {platforms.map((platform) => (
-              <Card key={platform.name} className="hover:shadow-lg transition-shadow duration-300">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <span className="text-2xl">{platform.icon}</span>
-                      <div>
-                        <CardTitle className="text-lg">{platform.name}</CardTitle>
-                        <CardDescription>{platform.description}</CardDescription>
+            {platforms.map((platform) => {
+              const enabled = isPlatformEnabled(platform.key);
+              
+              return (
+                <Card key={platform.name} className="hover:shadow-lg transition-shadow duration-300">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <span className="text-2xl">{platform.icon}</span>
+                        <div>
+                          <CardTitle className="text-lg">{platform.name}</CardTitle>
+                          <CardDescription>{platform.description}</CardDescription>
+                        </div>
                       </div>
+                      {platform.connected ? (
+                        <Badge variant="secondary" className="bg-green-100 text-green-800">
+                          <Check className="h-3 w-3 mr-1" />
+                          Connected
+                        </Badge>
+                      ) : enabled ? (
+                        <Badge variant="outline">Available</Badge>
+                      ) : (
+                        <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                          <Clock className="h-3 w-3 mr-1" />
+                          Coming Soon
+                        </Badge>
+                      )}
                     </div>
-                    {platform.connected ? (
-                      <Badge variant="secondary" className="bg-green-100 text-green-800">
-                        <Check className="h-3 w-3 mr-1" />
-                        Connected
-                      </Badge>
+                  </CardHeader>
+                  
+                  <CardContent>
+                    {!platform.connected ? (
+                      <Button 
+                        onClick={() => handleConnect(platform)}
+                        className="w-full"
+                        variant={enabled ? "outline" : "ghost"}
+                        disabled={!enabled}
+                      >
+                        {enabled ? (
+                          <>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Connect {platform.name}
+                          </>
+                        ) : (
+                          <>
+                            <Clock className="h-4 w-4 mr-2" />
+                            Coming Soon
+                          </>
+                        )}
+                      </Button>
                     ) : (
-                      <Badge variant="outline">Not Connected</Badge>
+                      <div className="text-sm text-gray-600">
+                        ✓ Account connected and data syncing
+                      </div>
                     )}
-                  </div>
-                </CardHeader>
-                
-                <CardContent>
-                  {!platform.connected ? (
-                    <Button 
-                      onClick={() => handleConnect(platform.name)}
-                      className="w-full"
-                      variant="outline"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Connect {platform.name}
-                    </Button>
-                  ) : (
-                    <div className="text-sm text-gray-600">
-                      ✓ Account connected and data syncing
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
           
           <div className="text-center mt-8">
             <p className="text-sm text-gray-500 mb-4">
               🔒 Your data is encrypted and secure. We only access the metrics needed for analysis.
+            </p>
+            <p className="text-sm text-blue-600">
+              💡 We're working hard to bring you Meta Ads and TikTok Ads integrations. Stay tuned!
             </p>
           </div>
         </div>
