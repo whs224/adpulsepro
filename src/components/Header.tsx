@@ -113,6 +113,12 @@ const Header = () => {
             >
               FAQ
             </button>
+            <button 
+              onClick={() => handleNavClick('/contact')}
+              className="text-slate-300 hover:text-white transition-colors"
+            >
+              Contact
+            </button>
             {user && (
               <button 
                 onClick={() => handleNavClick('/settings')}

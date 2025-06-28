@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { TrendingUp, TrendingDown, DollarSign, Eye, MousePointer, Target } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
@@ -16,6 +17,7 @@ const dummyData = [
 
 const Report = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [showCheckout, setShowCheckout] = useState(false);
 
   const totalSpend = dummyData.reduce((sum, item) => sum + item.spend, 0);
@@ -32,8 +34,8 @@ const Report = () => {
     setShowCheckout(true);
     setTimeout(() => setShowCheckout(false), 3000);
     
-    // Navigate to checkout (will implement later)
-    console.log('Navigating to checkout...');
+    // Navigate to checkout after a short delay
+    setTimeout(() => navigate('/checkout'), 1000);
   };
 
   return (

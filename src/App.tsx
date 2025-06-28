@@ -10,9 +10,13 @@ import Auth from "./pages/Auth";
 import Report from "./pages/Report";
 import Pricing from "./pages/Pricing";
 import FAQ from "./pages/FAQ";
+import Contact from "./pages/Contact";
 import Settings from "./pages/Settings";
+import Checkout from "./pages/Checkout";
+import PaymentSuccess from "./pages/PaymentSuccess";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AIAssistant from "./components/AIAssistant";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +32,9 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/faq" element={<FAQ />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route 
               path="/report" 
               element={
@@ -47,6 +54,7 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <AIAssistant />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
