@@ -20,46 +20,67 @@ const Auth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('Auth page - user state:', user);
     if (user) {
+      console.log('User is authenticated, redirecting to home');
       navigate('/');
     }
   }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Form submitted:', { isLogin, email, password, fullName });
     setLoading(true);
 
     try {
       if (isLogin) {
+        console.log('Attempting login...');
         const { error } = await signIn(email, password);
         if (error) {
+          console.error('Login error:', error);
           toast({
             title: "Login Failed",
             description: error.message,
             variant: "destructive",
           });
         } else {
+          console.log('Login successful');
           toast({
             title: "Welcome back!",
             description: "You have successfully logged in.",
           });
+          navigate('/');
         }
       } else {
+        console.log('Attempting signup...');
+        if (!fullName.trim()) {
+          toast({
+            title: "Validation Error",
+            description: "Please enter your full name.",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+        
         const { error } = await signUp(email, password, fullName);
         if (error) {
+          console.error('Signup error:', error);
           toast({
             title: "Sign Up Failed",
             description: error.message,
             variant: "destructive",
           });
         } else {
+          console.log('Signup successful');
           toast({
             title: "Account Created!",
             description: "Please check your email to verify your account.",
           });
         }
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Auth error:', error);
       toast({
         title: "An error occurred",
         description: "Please try again later.",
@@ -71,16 +92,43 @@ const Auth = () => {
   };
 
   const handleGoogleSignIn = async () => {
+    console.log('Attempting Google sign in...');
     setLoading(true);
-    const { error } = await signInWithGoogle();
-    if (error) {
+    try {
+      const { error } = await signInWithGoogle();
+      if (error) {
+        console.error('Google sign in error:', error);
+        toast({
+          title: "Google Sign In Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        console.log('Google sign in initiated');
+        toast({
+          title: "Redirecting...",
+          description: "You're being redirected to Google for authentication.",
+        });
+      }
+    } catch (error: any) {
+      console.error('Google auth error:', error);
       toast({
         title: "Google Sign In Failed",
-        description: error.message,
+        description: "Please try again later.",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
+  };
+
+  const handleToggleMode = () => {
+    console.log('Toggling auth mode from', isLogin ? 'login' : 'signup');
+    setIsLogin(!isLogin);
+    // Clear form when switching modes
+    setEmail('');
+    setPassword('');
+    setFullName('');
   };
 
   return (
@@ -138,6 +186,7 @@ const Auth = () => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
+              minLength={6}
               className="mt-1"
             />
           </div>
@@ -183,7 +232,7 @@ const Auth = () => {
         <div className="text-center mt-6">
           <button
             type="button"
-            onClick={() => setIsLogin(!isLogin)}
+            onClick={handleToggleMode}
             className="text-blue-600 hover:text-blue-800 text-sm underline"
           >
             {isLogin 
