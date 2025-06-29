@@ -17,7 +17,7 @@ const getOAuthConfigs = (): Record<string, OAuthConfig> => {
     google_ads: {
       clientId: "211962165284-laf0vao0gfeqsgtg22josn2n1pq9egg4.apps.googleusercontent.com",
       redirectUri: `${currentDomain}/oauth/callback`,
-      scopes: ['https://www.googleapis.com/auth/adwords'],
+      scopes: ['https://www.googleapis.com/auth/adwords.readonly'],
       authUrl: 'https://accounts.google.com/oauth/auth',
       enabled: true
     },
@@ -38,7 +38,7 @@ const getOAuthConfigs = (): Record<string, OAuthConfig> => {
     linkedin_ads: {
       clientId: "77sa4cca5uo0vc",
       redirectUri: `${currentDomain}/oauth/callback`,
-      scopes: ['r_ads', 'r_ads_reporting', 'r_organization_social'],
+      scopes: ['r_ads', 'r_ads_reporting', 'r_organization_social', 'r_liteprofile'],
       authUrl: 'https://www.linkedin.com/oauth/v2/authorization',
       enabled: true
     }

@@ -9,19 +9,19 @@ const corsHeaders = {
 
 const pricingPlans = {
   starter: {
-    priceId: "price_starter", // You'll need to create this in Stripe
+    priceId: "price_1RfQvdCyYA7DMxOTgUg5vp7c",
     credits: 100,
     maxTeamMembers: 1,
     price: 29
   },
   growth: {
-    priceId: "price_growth", // You'll need to create this in Stripe
+    priceId: "price_1RfQw7CyYA7DMxOTvR6UFpk6",
     credits: 500,
     maxTeamMembers: 3,
     price: 79
   },
   scale: {
-    priceId: "price_scale", // You'll need to create this in Stripe
+    priceId: "price_1RfQxbCyYA7DMxOTbb62pFVm",
     credits: 2000,
     maxTeamMembers: 10,
     price: 199

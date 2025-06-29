@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const corsHeaders = {
@@ -24,7 +23,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('Connected accounts:', connectedAccounts);
 
     // Get the OpenAI API key from Supabase secrets
-    const openaiApiKey = Deno.env.get('ChatGPT API');
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
     if (!openaiApiKey) {
       throw new Error('OpenAI API key not configured');
     }
