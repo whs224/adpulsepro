@@ -18,7 +18,7 @@ const getOAuthConfigs = (): Record<string, OAuthConfig> => {
       clientId: "211962165284-laf0vao0gfeqsgtg22josn2n1pq9egg4.apps.googleusercontent.com",
       redirectUri: `${currentDomain}/oauth/callback`,
       scopes: ['https://www.googleapis.com/auth/adwords.readonly'],
-      authUrl: 'https://accounts.google.com/oauth/auth',
+      authUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
       enabled: true
     },
     meta_ads: {
@@ -114,6 +114,24 @@ export const saveAdAccount = async (
   if (!user.user) {
     console.error('User not authenticated when trying to save ad account');
     throw new Error('User not authenticated');
+  }
+
+  // Enforce ad account connection limit based on plan
+  const { data: credits } = await supabase
+    .from('user_credits')
+    .select('max_team_members')
+    .eq('user_id', user.user.id)
+    .eq('is_active', true)
+    .single();
+
+  const { count: accountCount } = await supabase
+    .from('ad_accounts')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.user.id)
+    .eq('is_active', true);
+
+  if (credits && typeof accountCount === 'number' && accountCount >= credits.max_team_members) {
+    throw new Error('You have reached the maximum number of connected ad accounts for your plan. Please upgrade your plan to connect more.');
   }
 
   console.log('Saving ad account for user:', user.user.email);

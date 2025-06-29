@@ -67,6 +67,14 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <AdAnalyticsChat />
+                <div className="mt-4 flex justify-end">
+                  <button
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                    onClick={() => setActiveTab('settings')}
+                  >
+                    <span>+ Add Account</span>
+                  </button>
+                </div>
               </CardContent>
             </Card>
             

@@ -139,8 +139,39 @@ const AdAccountConnector = () => {
       return;
     }
 
+    // Enforce ad account connection limit based on plan
+    try {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) throw new Error('User not authenticated');
+      const { data: credits } = await supabase
+        .from('user_credits')
+        .select('max_team_members')
+        .eq('user_id', user.user.id)
+        .eq('is_active', true)
+        .single();
+      const { count: accountCount } = await supabase
+        .from('ad_accounts')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.user.id)
+        .eq('is_active', true);
+      if (credits && typeof accountCount === 'number' && accountCount >= credits.max_team_members) {
+        toast({
+          title: "Account Limit Reached",
+          description: `You have reached the maximum number of connected ad accounts for your plan. Please upgrade your plan to connect more.`,
+          variant: "destructive",
+        });
+        return;
+      }
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: err instanceof Error ? err.message : 'Failed to check account limits',
+        variant: "destructive",
+      });
+      return;
+    }
+
     setConnecting(platformKey);
-    
     try {
       // Initiate OAuth flow
       await initiateOAuth(platformKey);
