@@ -1,184 +1,190 @@
 
-import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Menu, X, BarChart3 } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate, useLocation } from "react-router-dom";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LogOut, User } from "lucide-react";
-import AuthModal from "./AuthModal";
+import { supabase } from "@/integrations/supabase/client";
 
 const Header = () => {
-  const [showAuth, setShowAuth] = useState(false);
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
-  const { user, signOut, loading } = useAuth();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const handleAuthClick = (mode: 'login' | 'signup') => {
-    if (user) return;
-    navigate('/auth');
-  };
+  const { user } = useAuth();
 
   const handleSignOut = async () => {
-    await signOut();
+    await supabase.auth.signOut();
     navigate('/');
   };
 
-  const getUserInitials = (name: string | undefined) => {
-    if (!name) return 'U';
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
-  };
-
-  const handleNavClick = (path: string) => {
-    if (path.startsWith('#')) {
-      // Handle anchor links for homepage sections
-      if (location.pathname !== '/') {
-        navigate('/');
-        setTimeout(() => {
-          const element = document.querySelector(path);
-          element?.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
-      } else {
-        const element = document.querySelector(path);
-        element?.scrollIntoView({ behavior: 'smooth' });
-      }
-    } else {
-      navigate(path);
-    }
-  };
-
-  if (loading) {
-    return (
-      <header className="fixed top-0 w-full bg-slate-800/95 backdrop-blur-sm border-b border-slate-700 z-50">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <img 
-              src="/lovable-uploads/ccada74d-80a1-45de-9c91-c3e558e1ff87.png" 
-              alt="AdPulse Logo" 
-              className="h-16 w-auto object-contain"
-            />
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="w-8 h-8 bg-slate-700 rounded-full animate-pulse"></div>
-          </div>
-        </div>
-      </header>
-    );
-  }
+  const navigation = [
+    { name: 'Features', href: '/#features' },
+    { name: 'How it Works', href: '/#how-it-works' },
+    { name: 'Pricing', href: '/pricing' },
+    { name: 'FAQ', href: '/faq' },
+    { name: 'Contact', href: '/contact' },
+  ];
 
   return (
-    <>
-      <header className="fixed top-0 w-full bg-slate-800/95 backdrop-blur-sm border-b border-slate-700 z-50">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <button onClick={() => navigate('/')}>
-              <img 
-                src="/lovable-uploads/ccada74d-80a1-45de-9c91-c3e558e1ff87.png" 
-                alt="AdPulse Logo" 
-                className="h-16 w-auto object-contain"
-              />
-            </button>
-          </div>
-          
+    <header className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-b border-gray-200 z-50">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <Link to="/" className="flex items-center space-x-3">
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
+              <BarChart3 className="h-6 w-6 text-white" />
+            </div>
+            <span className="text-xl font-bold text-gray-900">AdPulse</span>
+          </Link>
+
+          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            {user && (
-              <button 
-                onClick={() => handleNavClick('/report')}
-                className="text-slate-300 hover:text-white transition-colors"
+            {navigation.map((item) => (
+              <a
+                key={item.name}
+                href={item.href}
+                className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
               >
-                Report
-              </button>
-            )}
-            <button 
-              onClick={() => handleNavClick('/pricing')}
-              className="text-slate-300 hover:text-white transition-colors"
-            >
-              Pricing
-            </button>
-            <button 
-              onClick={() => handleNavClick('#features')}
-              className="text-slate-300 hover:text-white transition-colors"
-            >
-              Features
-            </button>
-            <button 
-              onClick={() => handleNavClick('#how-it-works')}
-              className="text-slate-300 hover:text-white transition-colors"
-            >
-              How it Works
-            </button>
-            <button 
-              onClick={() => handleNavClick('/faq')}
-              className="text-slate-300 hover:text-white transition-colors"
-            >
-              FAQ
-            </button>
-            <button 
-              onClick={() => handleNavClick('/contact')}
-              className="text-slate-300 hover:text-white transition-colors"
-            >
-              Contact
-            </button>
-            {user && (
-              <button 
-                onClick={() => handleNavClick('/settings')}
-                className="text-slate-300 hover:text-white transition-colors"
-              >
-                Settings
-              </button>
-            )}
+                {item.name}
+              </a>
+            ))}
           </nav>
-          
-          <div className="flex items-center space-x-4">
+
+          {/* Auth Buttons */}
+          <div className="hidden md:flex items-center space-x-4">
             {user ? (
-              <div className="flex items-center space-x-3">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={user.user_metadata?.avatar_url} />
-                  <AvatarFallback className="bg-blue-600 text-white text-sm">
-                    {getUserInitials(user.user_metadata?.full_name)}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-slate-300 text-sm hidden sm:inline">
-                  {user.user_metadata?.full_name || user.email}
-                </span>
+              <>
                 <Button 
                   variant="ghost" 
-                  size="sm"
-                  onClick={handleSignOut}
-                  className="text-slate-300 hover:text-white hover:bg-slate-700"
+                  onClick={() => navigate('/dashboard')}
+                  className="font-medium"
                 >
-                  <LogOut className="h-4 w-4" />
-                  <span className="hidden sm:ml-2 sm:inline">Sign Out</span>
+                  Dashboard
                 </Button>
-              </div>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => navigate('/settings')}
+                  className="font-medium"
+                >
+                  Settings
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={handleSignOut}
+                  className="font-medium"
+                >
+                  Sign Out
+                </Button>
+              </>
             ) : (
               <>
                 <Button 
                   variant="ghost" 
-                  onClick={() => handleAuthClick('login')}
-                  className="text-slate-300 hover:text-white hover:bg-slate-700"
+                  onClick={() => navigate('/auth')}
+                  className="font-medium"
                 >
-                  Login
+                  Sign In
                 </Button>
                 <Button 
-                  onClick={() => handleAuthClick('signup')}
-                  className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
+                  onClick={() => navigate('/auth')}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium"
                 >
                   Get Started
                 </Button>
               </>
             )}
           </div>
+
+          {/* Mobile menu button */}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden p-2"
+          >
+            {isMenuOpen ? (
+              <X className="h-6 w-6 text-gray-600" />
+            ) : (
+              <Menu className="h-6 w-6 text-gray-600" />
+            )}
+          </button>
         </div>
-      </header>
-      
-      <AuthModal 
-        isOpen={showAuth} 
-        onClose={() => setShowAuth(false)} 
-        mode={authMode}
-        onToggleMode={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')}
-      />
-    </>
+
+        {/* Mobile Navigation */}
+        {isMenuOpen && (
+          <div className="md:hidden py-4 border-t border-gray-200">
+            <div className="flex flex-col space-y-4">
+              {navigation.map((item) => (
+                <a
+                  key={item.name}
+                  href={item.href}
+                  className="text-gray-600 hover:text-gray-900 font-medium"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {item.name}
+                </a>
+              ))}
+              
+              <div className="pt-4 border-t border-gray-200">
+                {user ? (
+                  <>
+                    <Button 
+                      variant="ghost" 
+                      onClick={() => {
+                        navigate('/dashboard');
+                        setIsMenuOpen(false);
+                      }}
+                      className="w-full justify-start font-medium mb-2"
+                    >
+                      Dashboard
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      onClick={() => {
+                        navigate('/settings');
+                        setIsMenuOpen(false);
+                      }}
+                      className="w-full justify-start font-medium mb-2"
+                    >
+                      Settings
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        handleSignOut();
+                        setIsMenuOpen(false);
+                      }}
+                      className="w-full font-medium"
+                    >
+                      Sign Out
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button 
+                      variant="ghost" 
+                      onClick={() => {
+                        navigate('/auth');
+                        setIsMenuOpen(false);
+                      }}
+                      className="w-full justify-start font-medium mb-2"
+                    >
+                      Sign In
+                    </Button>
+                    <Button 
+                      onClick={() => {
+                        navigate('/auth');
+                        setIsMenuOpen(false);
+                      }}
+                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium"
+                    >
+                      Get Started
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </header>
   );
 };
 
