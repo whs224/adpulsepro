@@ -1,14 +1,18 @@
-
 import Header from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { getUserCredits } from "@/services/creditService";
 
 const pricingPlans = [
   {
     name: "Starter",
+    key: "starter",
     price: 29,
     credits: 100,
     users: 1,
@@ -24,6 +28,7 @@ const pricingPlans = [
   },
   {
     name: "Growth",
+    key: "growth",
     price: 79,
     credits: 500,
     users: 3,
@@ -41,6 +46,7 @@ const pricingPlans = [
   },
   {
     name: "Scale",
+    key: "scale",
     price: 199,
     credits: 2000,
     users: 10,
@@ -60,13 +66,78 @@ const pricingPlans = [
 const Pricing = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState<string | null>(null);
+  const [currentPlan, setCurrentPlan] = useState<string | null>(null);
 
-  const handleGetStarted = (planName: string) => {
+  // Load current user's plan
+  useEffect(() => {
     if (user) {
-      navigate('/dashboard');
-    } else {
-      navigate('/auth');
+      loadCurrentPlan();
     }
+  }, [user]);
+
+  const loadCurrentPlan = async () => {
+    try {
+      const credits = await getUserCredits();
+      if (credits) {
+        setCurrentPlan(credits.plan_name);
+      }
+    } catch (error) {
+      console.error('Error loading current plan:', error);
+    }
+  };
+
+  const handleGetStarted = async (planName: string) => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+
+    setLoading(planName);
+    
+    try {
+      // Create subscription checkout session
+      const { data, error } = await supabase.functions.invoke('create-subscription', {
+        body: { planName: planName.toLowerCase() }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // Redirect to Stripe Checkout
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
+      
+    } catch (error: unknown) {
+      console.error('Subscription creation failed:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unable to create subscription. Please try again.';
+      toast({
+        title: "Subscription Setup Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const isCurrentPlan = (planKey: string) => {
+    return currentPlan === planKey;
+  };
+
+  const isUpgrade = (planKey: string) => {
+    if (!currentPlan) return false;
+    
+    const planOrder = ['starter', 'growth', 'scale'];
+    const currentIndex = planOrder.indexOf(currentPlan);
+    const newIndex = planOrder.indexOf(planKey);
+    
+    return newIndex > currentIndex;
   };
 
   return (
@@ -130,14 +201,29 @@ const Pricing = () => {
                     </ul>
                     
                     <Button 
-                      onClick={() => handleGetStarted(plan.name)}
+                      onClick={() => handleGetStarted(plan.key)}
+                      disabled={loading === plan.key || isCurrentPlan(plan.key)}
                       className={`w-full py-3 ${plan.popular 
                         ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white' 
                         : 'bg-gray-900 hover:bg-gray-800 text-white'
                       }`}
                     >
-                      {user ? 'Upgrade to ' + plan.name : 'Start with ' + plan.name}
+                      {loading === plan.key ? (
+                        'Setting up...'
+                      ) : isCurrentPlan(plan.key) ? (
+                        'Current Plan'
+                      ) : isUpgrade(plan.key) ? (
+                        `Upgrade to ${plan.name}`
+                      ) : (
+                        `Start with ${plan.name}`
+                      )}
                     </Button>
+                    
+                    {isCurrentPlan(plan.key) && (
+                      <p className="text-center text-sm text-green-600 mt-2">
+                        ✓ Your current plan
+                      </p>
+                    )}
                   </CardContent>
                 </Card>
               ))}

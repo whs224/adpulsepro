@@ -1,10 +1,10 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MessageCircle, Settings, BarChart3 } from "lucide-react";
 import PlatformConnections from "@/components/PlatformConnections";
 import AdAnalyticsChat from "@/components/AdAnalyticsChat";
+import AdDataDashboard from "@/components/AdDataDashboard";
 import CreditDisplay from "@/components/CreditDisplay";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -69,6 +69,9 @@ const Dashboard = () => {
                 <AdAnalyticsChat />
               </CardContent>
             </Card>
+            
+            {/* Ad Data Dashboard below the chat */}
+            <AdDataDashboard />
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-6">

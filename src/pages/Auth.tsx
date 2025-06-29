@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -79,11 +78,12 @@ const Auth = () => {
           });
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Auth error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Please try again later.';
       toast({
         title: "An error occurred",
-        description: "Please try again later.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -110,11 +110,12 @@ const Auth = () => {
           description: "You're being redirected to Google for authentication.",
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Google auth error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Please try again later.';
       toast({
         title: "Google Sign In Failed",
-        description: "Please try again later.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

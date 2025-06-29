@@ -52,11 +52,12 @@ const Checkout = () => {
         throw new Error('No checkout URL received');
       }
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Payment creation failed:', error);
+      const errorMessage = error instanceof Error ? error.message : "Unable to create payment session. Please try again.";
       toast({
         title: "Payment Setup Failed",
-        description: error.message || "Unable to create payment session. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
