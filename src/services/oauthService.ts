@@ -15,7 +15,7 @@ const getOAuthConfigs = (): Record<string, OAuthConfig> => {
   
   return {
     google_ads: {
-      clientId: "211962165284-laf0vao0gfeqsgtg22josn2n1pq9egg4.apps.googleusercontent.com",
+      clientId: "211962165284-t2thud65iqscunist7u0c37gl02ab931.apps.googleusercontent.com",
       redirectUri: `${currentDomain}/oauth/callback`,
       scopes: ['https://www.googleapis.com/auth/adwords.readonly'],
       authUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
