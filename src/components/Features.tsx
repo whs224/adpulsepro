@@ -1,37 +1,37 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Brain, Shield, Zap, FileText, BarChart, Coins } from "lucide-react";
+import { Brain, Shield, Zap, Clock, Users, TrendingUp } from "lucide-react";
 
 const features = [
   {
     icon: Brain,
-    title: "AI-Powered Analysis",
-    description: "Advanced algorithms analyze your ad performance across all platforms to identify optimization opportunities."
-  },
-  {
-    icon: BarChart,
-    title: "Cross-Platform Insights",
-    description: "Get a unified view of your Meta, Google, TikTok, and LinkedIn ad performance in one comprehensive report."
+    title: "Simplify Complex Ad Analysis",
+    description: "Transform hours of spreadsheet work into simple conversations. Ask plain English questions and get instant insights from all your ad platforms."
   },
   {
     icon: Zap,
-    title: "Instant Optimization",
-    description: "Receive actionable recommendations that you can implement immediately to improve your ad performance."
+    title: "Lightning-Fast Insights",
+    description: "No more waiting for reports or manual data crunching. Get real-time analysis of your ad performance in seconds, not hours."
   },
   {
-    icon: FileText,
-    title: "Professional Reports",
-    description: "Beautifully designed PDF reports that you can share with your team or clients."
+    icon: Users,
+    title: "Team Collaboration Made Easy",
+    description: "Share insights instantly with your team. Everyone can ask questions and get the same data-driven answers without technical expertise."
+  },
+  {
+    icon: TrendingUp,
+    title: "Cross-Platform Intelligence",
+    description: "See the big picture across Google, Meta, TikTok, and LinkedIn ads. Compare performance and find opportunities you'd never spot manually."
+  },
+  {
+    icon: Clock,
+    title: "Save Hours Every Week",
+    description: "Stop spending time pulling reports and building dashboards. Focus on strategy while AI handles the heavy lifting of data analysis."
   },
   {
     icon: Shield,
-    title: "Enterprise Security",
-    description: "Bank-level encryption ensures your advertising data remains secure and private."
-  },
-  {
-    icon: Coins,
-    title: "Affordable Pricing",
-    description: "Get professional-grade analysis for just $5 per report - no subscriptions or hidden fees."
+    title: "Enterprise-Grade Security",
+    description: "Your advertising data is encrypted and secure. We use bank-level security to protect your sensitive business information."
   }
 ];
 
@@ -42,11 +42,11 @@ const Features = () => {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-white mb-4">
-              Everything You Need to Optimize Your Ads
+              Turn Complex Ad Data Into Simple Conversations
             </h2>
-            <p className="text-xl text-slate-300 max-w-2xl mx-auto">
-              Our platform combines the power of AI with deep advertising expertise to deliver 
-              actionable insights that drive real results.
+            <p className="text-xl text-slate-300 max-w-3xl mx-auto">
+              Stop wrestling with spreadsheets and dashboards. Our AI makes ad analysis as easy as asking a question, 
+              saving your team hours every week while delivering better insights.
             </p>
           </div>
           

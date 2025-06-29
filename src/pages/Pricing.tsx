@@ -11,8 +11,8 @@ const pricingPlans = [
     name: "Starter",
     price: 29,
     credits: 100,
-    support: "No",
-    teamAccess: "1 user",
+    users: 1,
+    support: "Email",
     features: [
       "100 AI Q&A messages per month",
       "Connect unlimited ad accounts",
@@ -26,33 +26,33 @@ const pricingPlans = [
     name: "Growth",
     price: 79,
     credits: 500,
-    support: "Yes",
-    teamAccess: "3 users",
+    users: 3,
+    support: "Priority",
     popular: true,
     features: [
       "500 AI Q&A messages per month",
+      "Up to 3 team members",
       "Everything in Starter",
       "Priority support",
       "Team collaboration",
       "Advanced analytics",
-      "Custom integrations",
-      "API access"
+      "Custom integrations"
     ]
   },
   {
     name: "Scale",
     price: 199,
     credits: 2000,
+    users: 10,
     support: "Premium",
-    teamAccess: "10 users",
     features: [
       "2000 AI Q&A messages per month",
+      "Up to 10 team members",
       "Everything in Growth",
       "Premium support",
       "White-label options",
       "Custom AI training",
-      "Dedicated account manager",
-      "SLA guarantee"
+      "Dedicated account manager"
     ]
   }
 ];
@@ -77,20 +77,21 @@ const Pricing = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h1 className="text-5xl font-bold text-gray-900 mb-6">
-              Monthly Subscription with "Smart Analyst" Access
+              Simple Pricing That Scales With Your Business
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-4">
-              Choose the plan that fits your needs. Chat with AI about your ad performance with monthly message credits.
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-6">
+              Choose the plan that fits your team size and analysis needs. Every plan includes unlimited ad account connections 
+              and real-time AI analysis. Pay monthly with message credits that reset each billing cycle.
             </p>
-            <div className="bg-blue-50 text-blue-800 px-4 py-2 rounded-lg inline-block">
-              <span className="text-sm">📊 Each "report request" is just a message — it's cheaper for you, and more flexible for them.</span>
+            <div className="bg-blue-50 text-blue-800 px-6 py-3 rounded-lg inline-block">
+              <span className="text-sm font-medium">💡 Each question to the AI counts as one message credit • No setup fees • Cancel anytime</span>
             </div>
           </div>
 
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {pricingPlans.map((plan) => (
-                <Card key={plan.name} className={`relative overflow-hidden ${plan.popular ? 'border-2 border-blue-500 shadow-2xl' : 'border shadow-lg'}`}>
+                <Card key={plan.name} className={`relative overflow-hidden ${plan.popular ? 'border-2 border-blue-500 shadow-2xl scale-105' : 'border shadow-lg'}`}>
                   {plan.popular && (
                     <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center py-2">
                       <span className="font-semibold">🚀 Most Popular</span>
@@ -107,13 +108,13 @@ const Pricing = () => {
                     </div>
                     <div className="space-y-2">
                       <div className="text-lg font-semibold text-gray-900">
-                        {plan.credits} AI Q&A messages
+                        {plan.credits} AI messages/month
                       </div>
                       <div className="text-sm text-gray-600">
-                        Priority Support: {plan.support}
+                        Up to {plan.users} team member{plan.users > 1 ? 's' : ''}
                       </div>
                       <div className="text-sm text-gray-600">
-                        Team Access: {plan.teamAccess}
+                        {plan.support} support included
                       </div>
                     </div>
                   </CardHeader>
@@ -135,7 +136,7 @@ const Pricing = () => {
                         : 'bg-gray-900 hover:bg-gray-800 text-white'
                       }`}
                     >
-                      {user ? 'Go to Dashboard' : 'Start Free Trial'}
+                      {user ? 'Upgrade to ' + plan.name : 'Start with ' + plan.name}
                     </Button>
                   </CardContent>
                 </Card>
@@ -143,33 +144,37 @@ const Pricing = () => {
             </div>
           </div>
 
-          <div className="text-center mt-12">
+          <div className="text-center mt-16">
             <div className="bg-gray-50 rounded-lg p-8 max-w-4xl mx-auto">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">All Plans Include:</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
-                <div className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-green-600" />
-                  <span>Connect Google Ads, Meta, TikTok & LinkedIn</span>
+              <h3 className="text-xl font-bold text-gray-900 mb-6">How Credits Work</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-600">
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span><strong>1 Credit = 1 AI Question:</strong> Ask "How did my Google Ads perform last week?" = 1 credit</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span><strong>Team Sharing:</strong> All team members share the monthly credit pool across connected accounts</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span><strong>Monthly Reset:</strong> Credits refresh every billing cycle - unused credits don't roll over</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-green-600" />
-                  <span>Real-time AI analysis and insights</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-green-600" />
-                  <span>Cross-platform performance comparisons</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-green-600" />
-                  <span>Secure OAuth integration</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-green-600" />
-                  <span>Natural language queries</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-green-600" />
-                  <span>24/7 data monitoring</span>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span><strong>Unlimited Accounts:</strong> Connect as many ad accounts as you want at no extra cost</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span><strong>Real-time Analysis:</strong> Every response includes live data from your connected platforms</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span><strong>Secure & Private:</strong> Your ad data stays encrypted and is never shared</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -177,7 +182,7 @@ const Pricing = () => {
 
           <div className="text-center mt-8">
             <p className="text-sm text-gray-500">
-              🔒 Secure payment • Cancel anytime • 14-day free trial
+              🔒 Secure payment • Cancel anytime • Enterprise pricing available for larger teams
             </p>
           </div>
         </div>

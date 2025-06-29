@@ -1,12 +1,12 @@
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, MessageCircle, BarChart3, Zap } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { ArrowRight, MessageCircle, BarChart3 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
-  const navigate = useNavigate();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const handleGetStarted = () => {
     if (user) {
@@ -17,64 +17,73 @@ const Hero = () => {
   };
 
   return (
-    <section className="pt-32 pb-20 bg-gradient-to-br from-slate-50 to-blue-50">
-      <div className="container mx-auto px-4">
+    <section className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 bg-grid-white/5 bg-grid-16 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
+      <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+      
+      <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="mb-8">
-            <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium mb-6">
-              <Zap className="h-4 w-4" />
-              AI-Powered Ad Analytics Chat
-            </div>
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              Chat with AI About Your
-              <span className="text-blue-600 block">Ad Performance</span>
-            </h1>
-            <p className="text-xl text-gray-600 mb-8 leading-relaxed max-w-3xl mx-auto">
-              Connect your Google Ads, Meta, TikTok, and LinkedIn accounts. Then ask our AI assistant anything about your campaign performance in real-time.
-            </p>
+          <div className="mb-6">
+            <span className="inline-flex items-center px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-300 text-sm font-medium">
+              <MessageCircle className="h-4 w-4 mr-2" />
+              Chat with AI • Analyze Ads • Get Insights
+            </span>
           </div>
           
+          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
+            Stop Wrestling With
+            <span className="block bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              Ad Spreadsheets
+            </span>
+          </h1>
+          
+          <p className="text-xl md:text-2xl text-slate-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+            Transform hours of manual ad analysis into simple conversations. 
+            Connect your Google, Meta, TikTok, and LinkedIn ads, then chat with AI to get instant insights 
+            that would take your team hours to compile.
+          </p>
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Button 
-              size="lg" 
               onClick={handleGetStarted}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg"
+              size="lg" 
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-6 text-lg font-semibold shadow-2xl hover:shadow-blue-500/25 transition-all duration-300"
             >
-              {user ? 'Go to Dashboard' : 'Start Chatting with AI'}
+              Start Analyzing Now
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             <Button 
               variant="outline" 
               size="lg"
-              onClick={() => navigate('/pricing')}
-              className="px-8 py-4 text-lg"
+              onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+              className="border-slate-600 text-slate-300 hover:bg-slate-800 px-8 py-6 text-lg"
             >
-              View Pricing
+              <BarChart3 className="mr-2 h-5 w-5" />
+              See How It Works
             </Button>
           </div>
 
-          {/* Feature highlights */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <div className="text-center">
-              <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-                <MessageCircle className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-gray-900 mb-2">AI Chat Interface</h3>
-                <p className="text-gray-600">Ask natural language questions about your ad performance and get instant insights</p>
-              </div>
+          {/* Value proposition highlights */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+            <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-6 border border-slate-700">
+              <h3 className="text-lg font-semibold text-white mb-2">Save 10+ Hours Weekly</h3>
+              <p className="text-slate-400 text-sm">
+                No more manual report building. Ask questions in plain English and get instant, comprehensive analysis.
+              </p>
             </div>
-            <div className="text-center">
-              <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-                <BarChart3 className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Real-time Analysis</h3>
-                <p className="text-gray-600">Connect your ad accounts and get live data analysis across all platforms</p>
-              </div>
+            <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-6 border border-slate-700">
+              <h3 className="text-lg font-semibold text-white mb-2">All Platforms, One Place</h3>
+              <p className="text-slate-400 text-sm">
+                Connect Google Ads, Meta, TikTok, and LinkedIn. Compare performance across all channels effortlessly.
+              </p>
             </div>
-            <div className="text-center">
-              <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-                <Zap className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Instant Insights</h3>
-                <p className="text-gray-600">Get actionable recommendations and optimization tips from AI analysis</p>
-              </div>
+            <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-6 border border-slate-700">
+              <h3 className="text-lg font-semibold text-white mb-2">Team-Ready Insights</h3>
+              <p className="text-slate-400 text-sm">
+                Share AI-generated insights with your team. Everyone gets the same data-driven answers, instantly.
+              </p>
             </div>
           </div>
         </div>

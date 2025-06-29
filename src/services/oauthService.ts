@@ -10,33 +10,35 @@ export interface OAuthConfig {
 }
 
 const getOAuthConfigs = (): Record<string, OAuthConfig> => {
-  const baseUrl = 'https://adpulse.pro';
+  // Get the current domain dynamically
+  const currentDomain = window.location.origin;
+  console.log('Current domain for OAuth:', currentDomain);
   
   return {
     google_ads: {
       clientId: "211962165284-laf0vao0gfeqsgtg22josn2n1pq9egg4.apps.googleusercontent.com",
-      redirectUri: `${baseUrl}/oauth/google`,
+      redirectUri: `${currentDomain}/oauth/callback`,
       scopes: ['https://www.googleapis.com/auth/adwords'],
-      authUrl: 'https://accounts.google.com/oauth2/auth',
+      authUrl: 'https://accounts.google.com/oauth/auth',
       enabled: true
     },
     meta_ads: {
       clientId: "YOUR_META_CLIENT_ID",
-      redirectUri: `${baseUrl}/oauth/meta`,
+      redirectUri: `${currentDomain}/oauth/callback`,
       scopes: ['ads_read', 'ads_management', 'business_management'],
       authUrl: 'https://www.facebook.com/v18.0/dialog/oauth',
       enabled: false // Coming soon - needs Meta Business verification
     },
     tiktok_ads: {
       clientId: "YOUR_TIKTOK_CLIENT_ID",
-      redirectUri: `${baseUrl}/oauth/tiktok`,
+      redirectUri: `${currentDomain}/oauth/callback`,
       scopes: ['advertiser.read', 'advertiser.write'],
       authUrl: 'https://business-api.tiktok.com/portal/auth',
       enabled: false // Coming soon
     },
     linkedin_ads: {
       clientId: "77sa4cca5uo0vc",
-      redirectUri: `${baseUrl}/oauth/linkedin`,
+      redirectUri: `${currentDomain}/oauth/callback`,
       scopes: ['r_ads', 'r_ads_reporting', 'r_organization_social'],
       authUrl: 'https://www.linkedin.com/oauth/v2/authorization',
       enabled: true
@@ -76,6 +78,7 @@ export const initiateOAuth = async (platform: string) => {
   const state = `${platform}_${timestamp}_${randomStr}_${userHash}`;
 
   console.log('Generated state for OAuth:', state);
+  console.log('OAuth redirect URI:', config.redirectUri);
 
   const params = new URLSearchParams({
     client_id: config.clientId,
