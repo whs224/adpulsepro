@@ -12,14 +12,12 @@ const Dashboard = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("chat");
   const platformConnectionsRef = useRef<HTMLDivElement>(null);
-  const accountsTabRef = useRef<HTMLButtonElement>(null);
 
   const handleAddAccount = () => {
     setActiveTab('settings');
     setTimeout(() => {
-      accountsTabRef.current?.click();
       platformConnectionsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
+    }, 100); // Wait for tab switch
   };
 
   return (
@@ -61,11 +59,7 @@ const Dashboard = () => {
               <MessageCircle className="h-4 w-4" />
               AI Chat
             </TabsTrigger>
-            <TabsTrigger
-              value="settings"
-              className="flex items-center gap-2"
-              ref={accountsTabRef}
-            >
+            <TabsTrigger value="settings" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
               Accounts
             </TabsTrigger>
