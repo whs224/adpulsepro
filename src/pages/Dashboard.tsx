@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MessageCircle, Settings, BarChart3 } from "lucide-react";
@@ -11,6 +11,14 @@ import { useAuth } from "@/contexts/AuthContext";
 const Dashboard = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("chat");
+  const platformConnectionsRef = useRef<HTMLDivElement>(null);
+
+  const handleAddAccount = () => {
+    setActiveTab('settings');
+    setTimeout(() => {
+      platformConnectionsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100); // Wait for tab switch
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -70,7 +78,7 @@ const Dashboard = () => {
                 <div className="mt-4 flex justify-end">
                   <button
                     className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                    onClick={() => setActiveTab('settings')}
+                    onClick={handleAddAccount}
                   >
                     <span>+ Add Account</span>
                   </button>
@@ -83,6 +91,7 @@ const Dashboard = () => {
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-6">
+            <div ref={platformConnectionsRef} />
             <Card>
               <CardHeader>
                 <CardTitle>Connected Accounts</CardTitle>
