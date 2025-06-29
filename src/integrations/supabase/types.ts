@@ -128,6 +128,33 @@ export type Database = {
           },
         ]
       }
+      credit_usage_log: {
+        Row: {
+          created_at: string
+          credits_used: number
+          id: string
+          message_content: string
+          team_owner_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits_used?: number
+          id?: string
+          message_content: string
+          team_owner_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits_used?: number
+          id?: string
+          message_content?: string
+          team_owner_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -152,12 +179,90 @@ export type Database = {
         }
         Relationships: []
       }
+      team_members: {
+        Row: {
+          id: string
+          invited_at: string
+          is_active: boolean
+          joined_at: string | null
+          member_email: string
+          member_user_id: string
+          role: string
+          team_owner_id: string
+        }
+        Insert: {
+          id?: string
+          invited_at?: string
+          is_active?: boolean
+          joined_at?: string | null
+          member_email: string
+          member_user_id: string
+          role?: string
+          team_owner_id: string
+        }
+        Update: {
+          id?: string
+          invited_at?: string
+          is_active?: boolean
+          joined_at?: string | null
+          member_email?: string
+          member_user_id?: string
+          role?: string
+          team_owner_id?: string
+        }
+        Relationships: []
+      }
+      user_credits: {
+        Row: {
+          billing_cycle_end: string
+          billing_cycle_start: string
+          created_at: string
+          id: string
+          is_active: boolean
+          max_team_members: number
+          plan_name: string
+          total_credits: number
+          updated_at: string
+          used_credits: number
+          user_id: string
+        }
+        Insert: {
+          billing_cycle_end?: string
+          billing_cycle_start?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_team_members?: number
+          plan_name?: string
+          total_credits?: number
+          updated_at?: string
+          used_credits?: number
+          user_id: string
+        }
+        Update: {
+          billing_cycle_end?: string
+          billing_cycle_start?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_team_members?: number
+          plan_name?: string
+          total_credits?: number
+          updated_at?: string
+          used_credits?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      use_credit: {
+        Args: { p_user_id: string; p_message: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
