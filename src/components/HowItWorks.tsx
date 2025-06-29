@@ -5,26 +5,26 @@ import { ArrowRight } from "lucide-react";
 const steps = [
   {
     step: "01",
-    title: "Connect Your Accounts",
-    description: "Securely link your Meta, Google, TikTok, and LinkedIn advertising accounts using official APIs.",
+    title: "Connect Your Ad Accounts",
+    description: "Securely link your Meta, Google, TikTok, and LinkedIn advertising accounts using official OAuth APIs.",
     color: "from-blue-500 to-blue-600"
   },
   {
     step: "02", 
-    title: "Choose Your Focus",
-    description: "Select the KPIs that matter most to your business - ROAS, CPA, conversions, or brand awareness.",
+    title: "Chat with AI Assistant",
+    description: "Ask natural language questions about your ad performance. Our AI analyzes your real-time data instantly.",
     color: "from-blue-400 to-blue-500"
   },
   {
     step: "03",
-    title: "AI Analysis",
-    description: "Our advanced algorithms analyze your data across platforms and identify optimization opportunities.",
+    title: "Get Instant Insights",
+    description: "Receive detailed analysis, comparisons, and recommendations based on your actual campaign data.",
     color: "from-blue-600 to-blue-700"
   },
   {
     step: "04",
-    title: "Get Your Report",
-    description: "Receive a beautifully designed PDF with actionable insights and specific recommendations for improvement.",
+    title: "Optimize Performance",
+    description: "Use AI-powered insights to make data-driven decisions and improve your advertising results.",
     color: "from-blue-500 to-blue-600"
   }
 ];
@@ -39,7 +39,7 @@ const HowItWorks = () => {
               How It Works
             </h2>
             <p className="text-xl text-slate-300 max-w-2xl mx-auto">
-              Get professional ad optimization insights in just 4 simple steps
+              Connect your accounts and start chatting with AI about your ad performance in 4 simple steps
             </p>
           </div>
           

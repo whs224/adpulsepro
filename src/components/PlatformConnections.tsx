@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +13,7 @@ const platforms = [
     key: "meta_ads",
     name: "Meta Ads",
     description: "Facebook & Instagram advertising",
-    icon: "🔵",
+    icon: "📘",
     connected: false,
     color: "blue"
   },
@@ -36,7 +37,7 @@ const platforms = [
     key: "linkedin_ads",
     name: "LinkedIn Ads",
     description: "Professional network advertising",
-    icon: "🔷",
+    icon: "💼",
     connected: false,
     color: "blue"
   }
@@ -89,7 +90,7 @@ const PlatformConnections = () => {
               Connect Your Ad Platforms
             </h2>
             <p className="text-lg text-gray-600">
-              Securely connect your advertising accounts to get comprehensive insights
+              Securely connect your advertising accounts to chat with AI about your performance
             </p>
             <p className="text-sm text-blue-600 mt-2">
               🚀 Google Ads and LinkedIn Ads available now • Meta Ads and TikTok Ads coming soon!
@@ -160,10 +161,10 @@ const PlatformConnections = () => {
           
           <div className="text-center mt-8">
             <p className="text-sm text-gray-500 mb-4">
-              🔒 Your data is encrypted and secure. We only access the metrics needed for analysis.
+              🔒 Your data is encrypted and secure. We only access the metrics needed for AI analysis.
             </p>
             <p className="text-sm text-blue-600">
-              💡 We're working hard to bring you Meta Ads and TikTok Ads integrations. Stay tuned!
+              💡 Connect your accounts and start asking AI questions about your ad performance!
             </p>
           </div>
         </div>

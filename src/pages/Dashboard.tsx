@@ -11,6 +11,13 @@ import { supabase } from "@/integrations/supabase/client";
 import AdAnalyticsChat from "@/components/AdAnalyticsChat";
 import AdAccountConnector from "@/components/AdAccountConnector";
 
+interface CampaignMetrics {
+  spend?: number;
+  impressions?: number;
+  clicks?: number;
+  conversions?: number;
+}
+
 const Dashboard = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -48,20 +55,20 @@ const Dashboard = () => {
         .order('fetched_at', { ascending: false });
 
       if (campaigns && campaigns.length > 0) {
-        const totalMetrics = campaigns.reduce((acc, campaign) => {
-          const metrics = campaign.metrics || {};
+        const totalMetrics = campaigns.reduce((acc: CampaignMetrics, campaign: any) => {
+          const metrics = (campaign.metrics as CampaignMetrics) || {};
           return {
             spend: (acc.spend || 0) + (metrics.spend || 0),
             impressions: (acc.impressions || 0) + (metrics.impressions || 0),
             clicks: (acc.clicks || 0) + (metrics.clicks || 0),
             conversions: (acc.conversions || 0) + (metrics.conversions || 0)
           };
-        }, {});
+        }, {} as CampaignMetrics);
 
         setRecentMetrics({
           ...totalMetrics,
-          ctr: totalMetrics.impressions > 0 ? (totalMetrics.clicks / totalMetrics.impressions * 100) : 0,
-          cpc: totalMetrics.clicks > 0 ? (totalMetrics.spend / totalMetrics.clicks) : 0,
+          ctr: (totalMetrics.impressions || 0) > 0 ? ((totalMetrics.clicks || 0) / (totalMetrics.impressions || 0) * 100) : 0,
+          cpc: (totalMetrics.clicks || 0) > 0 ? ((totalMetrics.spend || 0) / (totalMetrics.clicks || 0)) : 0,
           campaigns: campaigns.length
         });
       }
