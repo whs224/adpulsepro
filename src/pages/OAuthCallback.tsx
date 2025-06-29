@@ -1,8 +1,6 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { saveAdAccount } from "@/services/oauthService";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
@@ -65,8 +63,6 @@ const OAuthCallback = () => {
 
         if (storedState !== state) {
           console.error('State verification failed');
-          console.error('Expected:', storedState);
-          console.error('Received:', state);
           throw new Error('State verification failed - possible security issue');
         }
 
@@ -76,21 +72,30 @@ const OAuthCallback = () => {
         console.log(`Processing OAuth callback for platform: ${platform} with code: ${code.substring(0, 10)}...`);
         setMessage(`Connecting your ${platform.replace('_', ' ')} account...`);
 
-        // Check if user is authenticated
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        if (userError || !user) {
-          console.error('User not authenticated:', userError);
+        // Get current user session
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
           throw new Error('Please sign in to your AdPulse account first');
         }
 
-        console.log('User authenticated:', user.email);
+        console.log('User authenticated:', session.user.email);
 
-        if (platform === 'google_ads') {
-          await handleGoogleAdsCallback(code);
-        } else if (platform === 'linkedin_ads') {
-          await handleLinkedInCallback(code);
-        } else {
-          throw new Error(`Unsupported platform: ${platform}`);
+        // Exchange code for tokens using our edge function
+        const { data, error: exchangeError } = await supabase.functions.invoke('oauth-exchange', {
+          body: {
+            platform,
+            code,
+            state
+          }
+        });
+
+        if (exchangeError) {
+          console.error('Token exchange failed:', exchangeError);
+          throw new Error(exchangeError.message || 'Failed to exchange authorization code');
+        }
+
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to connect account');
         }
 
         setStatus('success');
@@ -101,9 +106,9 @@ const OAuthCallback = () => {
           description: `Your ${platform.replace('_', ' ')} account has been connected and is ready to use.`,
         });
 
-        // Redirect to settings after a short delay
+        // Redirect to dashboard after a short delay
         setTimeout(() => {
-          navigate('/settings');
+          navigate('/dashboard');
         }, 2000);
 
       } catch (error: any) {
@@ -117,65 +122,15 @@ const OAuthCallback = () => {
           variant: "destructive",
         });
 
-        // Redirect to settings after error
+        // Redirect to dashboard after error
         setTimeout(() => {
-          navigate('/settings');
+          navigate('/dashboard');
         }, 3000);
       }
     };
 
     handleOAuthCallback();
   }, [searchParams, navigate, toast]);
-
-  const handleGoogleAdsCallback = async (code: string) => {
-    console.log('Processing Google Ads callback with code:', code.substring(0, 10) + '...');
-    
-    // TODO: In production, exchange code for tokens via your backend
-    // For now, simulate successful connection with mock data
-    const mockAccountData = {
-      account_id: 'gads_' + Math.random().toString(36).substr(2, 9),
-      account_name: 'Google Ads Account',
-      access_token: 'mock_google_token_' + Date.now(),
-      refresh_token: 'mock_refresh_token_' + Date.now(),
-      expires_at: new Date(Date.now() + 3600000) // 1 hour from now
-    };
-
-    console.log('Saving Google Ads account data:', { ...mockAccountData, access_token: 'HIDDEN', refresh_token: 'HIDDEN' });
-
-    await saveAdAccount(
-      'google_ads',
-      mockAccountData.account_id,
-      mockAccountData.account_name,
-      mockAccountData.access_token,
-      mockAccountData.refresh_token,
-      mockAccountData.expires_at
-    );
-    
-    console.log('Google Ads account saved successfully');
-  };
-
-  const handleLinkedInCallback = async (code: string) => {
-    console.log('Processing LinkedIn Ads callback with code:', code.substring(0, 10) + '...');
-    
-    // TODO: In production, exchange code for tokens via your backend
-    // For now, simulate successful connection with mock data
-    const mockAccountData = {
-      account_id: 'lnkd_' + Math.random().toString(36).substr(2, 9),
-      account_name: 'LinkedIn Ads Account',
-      access_token: 'mock_linkedin_token_' + Date.now(),
-    };
-
-    console.log('Saving LinkedIn Ads account data:', { ...mockAccountData, access_token: 'HIDDEN' });
-
-    await saveAdAccount(
-      'linkedin_ads',
-      mockAccountData.account_id,
-      mockAccountData.account_name,
-      mockAccountData.access_token
-    );
-    
-    console.log('LinkedIn Ads account saved successfully');
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
@@ -196,7 +151,7 @@ const OAuthCallback = () => {
             </div>
             <h2 className="text-2xl font-bold text-gray-900">Success!</h2>
             <p className="text-gray-600">{message}</p>
-            <p className="text-sm text-gray-500">Redirecting you back to settings...</p>
+            <p className="text-sm text-gray-500">Redirecting you back to dashboard...</p>
           </div>
         )}
         
@@ -207,7 +162,7 @@ const OAuthCallback = () => {
             </div>
             <h2 className="text-2xl font-bold text-gray-900">Connection Failed</h2>
             <p className="text-gray-600">{message}</p>
-            <p className="text-sm text-gray-500">We'll redirect you back to settings to try again.</p>
+            <p className="text-sm text-gray-500">We'll redirect you back to dashboard to try again.</p>
             <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
               <p className="text-xs text-yellow-800">
                 💡 If this keeps happening, check your browser's developer console for detailed error logs.

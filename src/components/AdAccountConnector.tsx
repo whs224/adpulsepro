@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -71,7 +70,8 @@ const AdAccountConnector = () => {
         .from('ad_accounts')
         .select('*')
         .eq('user_id', user.user.id)
-        .eq('is_active', true);
+        .eq('is_active', true)
+        .order('connected_at', { ascending: false });
 
       if (error) {
         console.error('Error loading connected accounts:', error);
@@ -107,7 +107,7 @@ const AdAccountConnector = () => {
     
     try {
       // Initiate OAuth flow
-      initiateOAuth(platformKey);
+      await initiateOAuth(platformKey);
     } catch (error: any) {
       console.error('OAuth initiation failed:', error);
       toast({
@@ -156,7 +156,7 @@ const AdAccountConnector = () => {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle>Connected Ad Accounts</CardTitle>
-            <p className="text-sm text-gray-600 mt-1">Connect your advertising accounts to generate comprehensive reports</p>
+            <p className="text-sm text-gray-600 mt-1">Connect your advertising accounts to start getting AI insights</p>
           </div>
           <Button variant="outline" size="sm" onClick={handleRefresh}>
             <RefreshCw className="h-4 w-4 mr-2" />
