@@ -14,7 +14,7 @@ const Dashboard = () => {
   const platformConnectionsRef = useRef<HTMLDivElement>(null);
   const accountsTabRef = useRef<HTMLButtonElement>(null);
 
-  const handleAddAccount = () => {
+  const goToAccountsTab = () => {
     setActiveTab('settings');
     setTimeout(() => {
       accountsTabRef.current?.click();
@@ -81,19 +81,10 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <AdAnalyticsChat />
-                <div className="mt-4 flex justify-end">
-                  <button
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                    onClick={handleAddAccount}
-                  >
-                    <span>+ Add Account</span>
-                  </button>
-                </div>
               </CardContent>
             </Card>
             
-            {/* Ad Data Dashboard below the chat */}
-            <AdDataDashboard />
+            <AdDataDashboard goToAccountsTab={goToAccountsTab} />
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-6">

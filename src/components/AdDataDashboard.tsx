@@ -41,7 +41,20 @@ interface PlatformData {
   metrics?: AdMetrics;
 }
 
-const AdDataDashboard = () => {
+interface CampaignMetrics {
+  spend?: number;
+  impressions?: number;
+  clicks?: number;
+  conversions?: number;
+  revenue?: number;
+}
+
+// Add prop type
+type AdDataDashboardProps = {
+  goToAccountsTab?: () => void;
+};
+
+const AdDataDashboard = ({ goToAccountsTab }: AdDataDashboardProps) => {
   const [platformData, setPlatformData] = useState<PlatformData[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -114,25 +127,17 @@ const AdDataDashboard = () => {
     }
   };
 
-  const calculateAggregatedMetrics = (campaigns: unknown[]): AdMetrics | undefined => {
+  const calculateAggregatedMetrics = (campaigns: any[]): AdMetrics | undefined => {
     if (campaigns.length === 0) return undefined;
 
-    interface CampaignMetrics {
-      spend?: number;
-      impressions?: number;
-      clicks?: number;
-      conversions?: number;
-      revenue?: number;
-    }
-
     const totalMetrics = campaigns.reduce((acc: { spend: number; impressions: number; clicks: number; conversions: number; revenue: number }, campaign) => {
-      const metrics = (campaign as { metrics?: CampaignMetrics })?.metrics || {};
+      const metrics: CampaignMetrics = typeof campaign.metrics === 'object' ? campaign.metrics : {};
       return {
-        spend: acc.spend + (metrics.spend || 0),
-        impressions: acc.impressions + (metrics.impressions || 0),
-        clicks: acc.clicks + (metrics.clicks || 0),
-        conversions: acc.conversions + (metrics.conversions || 0),
-        revenue: acc.revenue + (metrics.revenue || 0)
+        spend: acc.spend + (metrics.spend ?? 0),
+        impressions: acc.impressions + (metrics.impressions ?? 0),
+        clicks: acc.clicks + (metrics.clicks ?? 0),
+        conversions: acc.conversions + (metrics.conversions ?? 0),
+        revenue: acc.revenue + (metrics.revenue ?? 0)
       };
     }, { spend: 0, impressions: 0, clicks: 0, conversions: 0, revenue: 0 });
 
@@ -245,7 +250,7 @@ const AdDataDashboard = () => {
             <p className="text-gray-600 mb-4">
               Connect your advertising accounts to see performance data here
             </p>
-            <Button variant="outline">
+            <Button variant="outline" onClick={goToAccountsTab}>
               Connect Accounts
             </Button>
           </div>
