@@ -4,17 +4,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MessageCircle, X, Send, Bot } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const AIAssistant = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: 'Hi! I\'m your AdPulse AI assistant. I can help you with questions about ad analytics, our platform, or getting started. What would you like to know?'
+      content: 'Hi! I\'m your AdPulse AI assistant. I can help you analyze your advertising data across Google Ads, Meta, TikTok, and LinkedIn. Connect your accounts in the dashboard to get started, or ask me any questions about AdPulse!'
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const { user } = useAuth();
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
@@ -24,20 +27,37 @@ const AIAssistant = () => {
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setIsTyping(true);
 
-    // Simulate AI response (in real app, this would call your AI API)
-    setTimeout(() => {
-      const responses = [
-        "That's a great question! AdPulse analyzes your ad performance across multiple platforms to give you actionable insights.",
-        "I'd be happy to help with that! Our reports include detailed metrics like CTR, CPC, ROAS, and AI-powered recommendations.",
-        "For technical support or specific account questions, please contact our team at contact@adpulse.pro or 415-317-6427.",
-        "AdPulse supports Google Ads, Meta Ads, TikTok Ads, and LinkedIn Ads. We're constantly adding more platforms!",
-        "Our AI analyzes your data to provide recommendations like budget reallocation, audience optimization, and campaign improvements."
+    try {
+      // Call the analyze-ad-data edge function with OpenAI integration
+      const { data, error } = await supabase.functions.invoke('analyze-ad-data', {
+        body: { 
+          query: userMessage,
+          userId: user?.id 
+        }
+      });
+
+      if (error) throw error;
+
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: data.analysis || "I'm here to help! If you have connected ad accounts, I can analyze your performance data. Otherwise, I can answer questions about AdPulse features and help you get started."
+      }]);
+    } catch (error) {
+      console.error('AI Assistant error:', error);
+      // Fallback responses for common questions
+      const fallbackResponses = [
+        "I'm here to help with your advertising analytics! Connect your Google Ads, Meta, TikTok, or LinkedIn accounts in the dashboard to start getting AI-powered insights.",
+        "AdPulse makes advertising simple - just ask me questions in plain English about your campaign performance once you've connected your accounts.",
+        "Need help getting started? Go to your dashboard to connect your advertising accounts, then come back and ask me about your performance data!",
+        "I can analyze your ad performance across all platforms once you've connected your accounts. Try asking something like 'How are my Google Ads performing this week?'",
+        "For technical support or account questions, please contact our team at contact@adpulse.pro or 415-317-6427."
       ];
       
-      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+      const randomResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
       setMessages(prev => [...prev, { role: 'assistant', content: randomResponse }]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -118,7 +138,7 @@ const AIAssistant = () => {
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Ask me anything..."
+                  placeholder="Ask about your ad performance..."
                   className="flex-1"
                 />
                 <Button onClick={handleSendMessage} size="sm">

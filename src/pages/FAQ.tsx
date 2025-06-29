@@ -7,53 +7,63 @@ const FAQ = () => {
   const faqs = [
     {
       id: "1",
-      question: "What is Adpulse?",
-      answer: "Adpulse is a tool that helps you analyze and understand your ad performance across platforms like Google Ads, Meta Ads, TikTok Ads, and LinkedIn Ads — all in one place."
+      question: "What is AdPulse?",
+      answer: "AdPulse is an AI-powered advertising assistant that connects to your ad accounts (Google Ads, Meta, TikTok, LinkedIn) and lets you chat with AI to get instant insights about your campaign performance. No more manual reports or spreadsheet analysis."
     },
     {
       id: "2", 
-      question: "Which ad platforms does Adpulse support?",
-      answer: "We currently support Google Ads, Meta Ads (Facebook & Instagram), TikTok Ads, and LinkedIn Ads. More integrations are planned as we grow."
+      question: "Which ad platforms does AdPulse support?",
+      answer: "We currently support Google Ads, Meta Ads (Facebook & Instagram), TikTok Ads, and LinkedIn Ads. Simply connect your accounts and start chatting with our AI about your performance data."
     },
     {
       id: "3",
-      question: "Do I need to manually upload my ad data?",
-      answer: "No. Once you connect your ad accounts, Adpulse automatically pulls in your performance data for analysis."
+      question: "How does the AI chat work?",
+      answer: "Once you connect your ad accounts, you can ask our AI questions in plain English like 'How did my Google Ads perform last week?' or 'Which campaign has the lowest cost per click?' The AI analyzes your real data and gives you instant, actionable insights."
     },
     {
       id: "4",
-      question: "Can I download my ad performance reports?",
-      answer: "Yes. You can generate a clear, professional PDF report that includes key metrics, charts, and optimization suggestions."
+      question: "Do I need to upload my ad data manually?",
+      answer: "No! AdPulse automatically connects to your ad platforms via secure OAuth and pulls your performance data in real-time. Just connect once and start chatting."
     },
     {
       id: "5",
-      question: "Will Adpulse make changes to my campaigns?",
-      answer: "No. You stay fully in control. Adpulse only analyzes your data and provides smart recommendations."
+      question: "Will AdPulse make changes to my campaigns?",
+      answer: "Absolutely not. AdPulse is read-only and only analyzes your data to provide insights and recommendations. You stay in complete control of your campaigns."
     },
     {
       id: "6",
       question: "Is my data secure?",
-      answer: "Absolutely. We use secure OAuth connections and encrypt all data. Your credentials and campaign information are never shared."
+      answer: "Yes. We use bank-level security with encrypted OAuth connections. Your ad data and credentials are never stored permanently and are only used to generate your requested insights."
     },
     {
       id: "7",
-      question: "How often is data updated?",
-      answer: "Adpulse updates your data automatically every 24 hours. You can also sync manually at any time."
+      question: "How does the credit system work?",
+      answer: "Each AI chat message costs 1 credit. Our Growth plan includes 100 credits/month for 3 users, and our Scale plan includes 500 credits/month for 10 users. Credits reset monthly."
     },
     {
       id: "8",
-      question: "How much does it cost?",
-      answer: "Our MVP pricing is just $5 per report. This is a special launch price to help us validate the product and gather feedback."
+      question: "Can multiple team members use one account?",
+      answer: "Yes! Both our Growth and Scale plans support multiple users. Your team can collaborate and everyone gets access to the same AI-powered insights."
     },
     {
       id: "9",
       question: "How do I connect my ad accounts?",
-      answer: "Simply go to Settings after signing up, and use our secure OAuth integration to connect your Google Ads, Meta Ads, TikTok Ads, and LinkedIn Ads accounts."
+      answer: "Go to your dashboard after signing up and click 'Connect Account' for each platform. We use secure OAuth so you never share your passwords with us."
     },
     {
       id: "10",
-      question: "What kind of recommendations do you provide?",
-      answer: "Our AI analyzes your data and provides actionable recommendations like budget reallocation suggestions, audience optimization tips, campaign pause recommendations, and bid adjustment strategies."
+      question: "What kind of questions can I ask the AI?",
+      answer: "Ask anything about your ad performance! Examples: 'Compare my Facebook and Google ad costs this month', 'Which audiences perform best on TikTok?', 'Show me my worst performing campaigns', or 'What's my overall ROAS trend?'"
+    },
+    {
+      id: "11",
+      question: "Is there a free trial?",
+      answer: "We don't offer free trials, but both plans are very affordable and you can cancel anytime. Start with our Growth plan to see how AdPulse transforms your ad analysis workflow."
+    },
+    {
+      id: "12",
+      question: "Can I cancel my subscription?",
+      answer: "Yes, you can cancel your subscription at any time from your account settings. You'll continue to have access until the end of your current billing period."
     }
   ];
 
@@ -68,7 +78,7 @@ const FAQ = () => {
               Frequently Asked Questions
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Everything you need to know about AdPulse and how it can help optimize your advertising campaigns.
+              Everything you need to know about AdPulse and how our AI assistant can transform your advertising workflow.
             </p>
           </div>
 

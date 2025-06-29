@@ -28,21 +28,20 @@ const Hero = () => {
           <div className="mb-6">
             <span className="inline-flex items-center px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-300 text-sm font-medium">
               <MessageCircle className="h-4 w-4 mr-2" />
-              Chat with AI • Analyze Ads • Get Insights
+              Marketing Made Simple • Chat with AI • Get Instant Insights
             </span>
           </div>
           
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-            Stop Wrestling With
+            Marketing Made
             <span className="block bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Ad Spreadsheets
+              Effortlessly Simple
             </span>
           </h1>
           
           <p className="text-xl md:text-2xl text-slate-300 mb-8 max-w-3xl mx-auto leading-relaxed">
-            Transform hours of manual ad analysis into simple conversations. 
-            Connect your Google, Meta, TikTok, and LinkedIn ads, then chat with AI to get instant insights 
-            that would take your team hours to compile.
+            Stop drowning in spreadsheets and dashboards. Connect your Google, Meta, TikTok, and LinkedIn ads, 
+            then simply chat with AI to get the insights you need. No technical skills required.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
@@ -51,7 +50,7 @@ const Hero = () => {
               size="lg" 
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-6 text-lg font-semibold shadow-2xl hover:shadow-blue-500/25 transition-all duration-300"
             >
-              Start Analyzing Now
+              Start Chatting with AI
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             <Button 
@@ -68,21 +67,21 @@ const Hero = () => {
           {/* Value proposition highlights */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
             <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-6 border border-slate-700">
-              <h3 className="text-lg font-semibold text-white mb-2">Save 10+ Hours Weekly</h3>
+              <h3 className="text-lg font-semibold text-white mb-2">Ask Questions in Plain English</h3>
               <p className="text-slate-400 text-sm">
-                No more manual report building. Ask questions in plain English and get instant, comprehensive analysis.
+                "How did my Facebook ads perform last week?" Get instant answers without touching a single spreadsheet.
               </p>
             </div>
             <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-6 border border-slate-700">
-              <h3 className="text-lg font-semibold text-white mb-2">All Platforms, One Place</h3>
+              <h3 className="text-lg font-semibold text-white mb-2">All Platforms, One Conversation</h3>
               <p className="text-slate-400 text-sm">
-                Connect Google Ads, Meta, TikTok, and LinkedIn. Compare performance across all channels effortlessly.
+                Connect Google, Meta, TikTok, and LinkedIn. Compare performance across all channels in one chat.
               </p>
             </div>
             <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-6 border border-slate-700">
-              <h3 className="text-lg font-semibold text-white mb-2">Team-Ready Insights</h3>
+              <h3 className="text-lg font-semibold text-white mb-2">Instant Business Intelligence</h3>
               <p className="text-slate-400 text-sm">
-                Share AI-generated insights with your team. Everyone gets the same data-driven answers, instantly.
+                Get actionable insights in seconds. Perfect for busy marketers who need answers, not more dashboards.
               </p>
             </div>
           </div>

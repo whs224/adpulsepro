@@ -8,39 +8,38 @@ const Footer = () => {
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center space-x-3 mb-4">
                 <img 
-                  src="/lovable-uploads/ccada74d-80a1-45de-9c91-c3e558e1ff87.png" 
+                  src="/lovable-uploads/42d2f28c-5627-4568-937d-18299a06a8a2.png" 
                   alt="AdPulse Logo" 
                   className="h-12 w-auto object-contain"
                 />
               </div>
               <p className="text-slate-400 mb-4 max-w-md">
-                AI-powered ad optimization across Meta, Google, TikTok, and LinkedIn. 
-                Get personalized insights and improve your advertising ROI.
+                AI-powered advertising made simple. Chat with our AI to get instant insights from your Google, Meta, TikTok, and LinkedIn ads.
               </p>
               <div className="flex space-x-4">
                 <a href="#" className="text-slate-400 hover:text-white transition-colors">Twitter</a>
                 <a href="#" className="text-slate-400 hover:text-white transition-colors">LinkedIn</a>
-                <a href="#" className="text-slate-400 hover:text-white transition-colors">Support</a>
+                <a href="mailto:contact@adpulse.pro" className="text-slate-400 hover:text-white transition-colors">Support</a>
               </div>
             </div>
             
             <div>
               <h3 className="font-semibold mb-4 text-white">Product</h3>
               <ul className="space-y-2 text-slate-400">
-                <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
-                <li><a href="#pricing" className="hover:text-white transition-colors">Pricing</a></li>
-                <li><a href="#how-it-works" className="hover:text-white transition-colors">How it Works</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">API Documentation</a></li>
+                <li><a href="/#features" className="hover:text-white transition-colors">Features</a></li>
+                <li><a href="/pricing" className="hover:text-white transition-colors">Pricing</a></li>
+                <li><a href="/#how-it-works" className="hover:text-white transition-colors">How it Works</a></li>
+                <li><a href="/faq" className="hover:text-white transition-colors">FAQ</a></li>
               </ul>
             </div>
             
             <div>
               <h3 className="font-semibold mb-4 text-white">Company</h3>
               <ul className="space-y-2 text-slate-400">
-                <li><a href="#" className="hover:text-white transition-colors">About</a></li>
+                <li><a href="/about" className="hover:text-white transition-colors">About</a></li>
                 <li><a href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
+                <li><a href="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</a></li>
+                <li><a href="/contact" className="hover:text-white transition-colors">Contact</a></li>
               </ul>
             </div>
           </div>

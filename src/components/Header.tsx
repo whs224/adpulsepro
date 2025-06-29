@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, BarChart3 } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,10 +30,11 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
-              <BarChart3 className="h-6 w-6 text-white" />
-            </div>
-            <span className="text-xl font-bold text-gray-900">AdPulse</span>
+            <img 
+              src="/lovable-uploads/42d2f28c-5627-4568-937d-18299a06a8a2.png" 
+              alt="AdPulse Logo" 
+              className="h-8 w-auto object-contain"
+            />
           </Link>
 
           {/* Desktop Navigation */}
