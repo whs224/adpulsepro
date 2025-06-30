@@ -1,3 +1,4 @@
+
 import { useState, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,7 +19,7 @@ const Dashboard = () => {
     setActiveTab('settings');
     setTimeout(() => {
       platformConnectionsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100); // Wait for tab switch
+    }, 100);
   };
 
   return (
