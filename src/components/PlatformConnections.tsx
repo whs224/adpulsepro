@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Plus, Clock } from "lucide-react";
+import { Check, Plus, Clock, Loader2 } from "lucide-react";
 import { isPlatformEnabled, initiateOAuth } from "@/services/oauthService";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -47,10 +47,11 @@ const platforms = [
   {
     key: "meta_ads",
     name: "Meta Ads",
-    description: "Facebook & Instagram advertising",
+    description: "Coming soon",
     logo: MetaAdsLogo,
     connected: false,
-    color: "blue"
+    color: "blue",
+    comingSoon: true
   },
   {
     key: "google_ads",
@@ -58,23 +59,26 @@ const platforms = [
     description: "Search, Display & YouTube advertising",
     logo: GoogleAdsLogo,
     connected: false,
-    color: "red"
+    color: "red",
+    comingSoon: false
   },
   {
     key: "tiktok_ads",
     name: "TikTok Ads",
-    description: "TikTok for Business advertising",
+    description: "Coming soon",
     logo: TikTokAdsLogo,
     connected: false,
-    color: "gray"
+    color: "gray",
+    comingSoon: true
   },
   {
     key: "linkedin_ads",
     name: "LinkedIn Ads",
-    description: "Professional network advertising",
+    description: "Coming soon",
     logo: LinkedInAdsLogo,
     connected: false,
-    color: "blue"
+    color: "blue",
+    comingSoon: true
   }
 ];
 
@@ -167,20 +171,21 @@ const PlatformConnections = () => {
                   <CardContent>
                     {!platform.connected ? (
                       <Button 
-                        onClick={() => handleConnect(platform)}
-                        className="w-full"
                         variant={enabled ? "outline" : "ghost"}
-                        disabled={!enabled}
+                        size="sm"
+                        onClick={() => handleConnect(platform)}
+                        disabled={!enabled || platform.comingSoon}
+                        className={!enabled || platform.comingSoon ? "opacity-60" : ""}
                       >
-                        {enabled ? (
-                          <>
-                            <Plus className="h-4 w-4 mr-2" />
-                            Connect {platform.name}
-                          </>
-                        ) : (
+                        {platform.comingSoon ? (
                           <>
                             <Clock className="h-4 w-4 mr-2" />
                             Coming Soon
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Connect
                           </>
                         )}
                       </Button>

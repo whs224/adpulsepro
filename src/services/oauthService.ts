@@ -6,6 +6,7 @@ export interface OAuthConfig {
   scopes: string[];
   authUrl: string;
   enabled: boolean;
+  description?: string;
 }
 
 const getOAuthConfigs = (): Record<string, OAuthConfig> => {
@@ -26,21 +27,24 @@ const getOAuthConfigs = (): Record<string, OAuthConfig> => {
       redirectUri: `${currentDomain}/oauth/callback`,
       scopes: ['ads_read', 'ads_management', 'business_management'],
       authUrl: 'https://www.facebook.com/v18.0/dialog/oauth',
-      enabled: true // Enabled for development - needs Meta Business verification for production
+      enabled: false, // Coming soon
+      description: 'Coming soon'
     },
     tiktok_ads: {
       clientId: "YOUR_TIKTOK_CLIENT_ID",
       redirectUri: `${currentDomain}/oauth/callback`,
       scopes: ['advertiser.read', 'advertiser.write'],
       authUrl: 'https://business-api.tiktok.com/portal/auth',
-      enabled: true // Enabled for development - needs TikTok Business verification for production
+      enabled: false, // Coming soon
+      description: 'Coming soon'
     },
     linkedin_ads: {
       clientId: "77sa4cca5uo0vc",
       redirectUri: `${currentDomain}/oauth/callback`,
       scopes: ['r_ads', 'r_ads_reporting', 'r_organization_social', 'r_liteprofile'],
       authUrl: 'https://www.linkedin.com/oauth/v2/authorization',
-      enabled: true
+      enabled: false, // Coming soon
+      description: 'Coming soon'
     }
   };
 };
