@@ -9,6 +9,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const isAdmin = user?.email === "willsiwinski@gmail.com";
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -33,6 +34,9 @@ const Header = () => {
         <Button variant="ghost" className="text-white hover:bg-blue-700" onClick={() => navigate("/dashboard")}>Dashboard</Button>
         <Button variant="ghost" className="text-white hover:bg-blue-700" onClick={() => navigate("/pricing")}>Pricing</Button>
         <Button variant="ghost" className="text-white hover:bg-blue-700" onClick={() => navigate("/settings")}>Settings</Button>
+        {isAdmin && (
+          <Button variant="ghost" className="text-white hover:bg-blue-700" onClick={() => navigate("/admin")}>Admin</Button>
+        )}
         {user ? (
           <Button variant="outline" className="text-white border-white hover:bg-white/10 hover:text-white focus:bg-white/10 focus:text-white transition-colors" onClick={signOut}>
             Sign Out

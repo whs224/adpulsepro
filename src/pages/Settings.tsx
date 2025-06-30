@@ -53,6 +53,19 @@ const Settings = () => {
     if (data) setTeamMembers(data);
   };
 
+  const sendTeamEmail = async (type: 'invite' | 'accepted' | 'removed', to: string, extra: any = {}) => {
+    const teamOwner = user?.email || '';
+    const teamName = 'AdPulse Team';
+    let payload: any = { type, to, teamOwner, teamName };
+    if (type === 'invite') payload.inviteLink = window.location.origin + '/auth';
+    if (type === 'accepted' || type === 'removed') payload.memberEmail = extra.memberEmail;
+    await fetch('/functions/v1/send-team-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  };
+
   const handleInvite = async () => {
     setInviteLoading(true);
     try {
@@ -65,6 +78,7 @@ const Settings = () => {
           is_active: false
         });
       if (error) throw error;
+      await sendTeamEmail('invite', inviteEmail);
       toast({ title: "Invite Sent", description: `Invitation sent to ${inviteEmail}` });
       setInviteEmail("");
       loadTeam();
@@ -148,6 +162,42 @@ const Settings = () => {
   const getUserInitials = (name: string | undefined) => {
     if (!name) return 'U';
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
+  // Separate active members and pending invites
+  const activeMembers = teamMembers.filter(m => m.is_active && m.member_user_id);
+  const pendingInvites = teamMembers.filter(m => !m.is_active && (!m.member_user_id || m.member_user_id === ''));
+
+  const handleRemoveMember = async (memberId: string, memberEmail: string) => {
+    setInviteLoading(true);
+    try {
+      await supabase.from('team_members').update({ is_active: false }).eq('id', memberId);
+      await sendTeamEmail('removed', memberEmail, { memberEmail });
+      toast({ title: 'Member removed' });
+      loadTeam();
+    } catch (err) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setInviteLoading(false);
+    }
+  };
+
+  const handleCancelInvite = async (inviteId: string) => {
+    setInviteLoading(true);
+    try {
+      await supabase.from('team_members').delete().eq('id', inviteId);
+      toast({ title: 'Invite canceled' });
+      loadTeam();
+    } catch (err) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setInviteLoading(false);
+    }
+  };
+
+  const handleResendInvite = async (inviteEmail: string) => {
+    await sendTeamEmail('invite', inviteEmail);
+    toast({ title: 'Invite resent', description: `Resent invite to ${inviteEmail}` });
   };
 
   return (
@@ -289,13 +339,34 @@ const Settings = () => {
                     <div>
                       <h4 className="font-semibold mb-2">Current Team Members</h4>
                       <ul className="space-y-2">
-                        {teamMembers.length === 0 && <li className="text-gray-500">No team members yet.</li>}
-                        {teamMembers.map(member => (
+                        {activeMembers.length === 0 && <li className="text-gray-500">No team members yet.</li>}
+                        {activeMembers.map(member => (
                           <li key={member.id} className="flex items-center gap-2">
                             <Avatar className="h-6 w-6"><AvatarFallback>{member.member_email[0]}</AvatarFallback></Avatar>
                             <span>{member.member_email}</span>
                             <span className="text-xs text-gray-400">{member.role}</span>
                             {member.member_user_id === user.id && <span className="text-xs text-blue-600">(You)</span>}
+                            {user.id === member.team_owner_id && member.member_user_id !== user.id && (
+                              <Button size="sm" variant="destructive" onClick={() => handleRemoveMember(member.id, member.member_email)} disabled={inviteLoading}>Remove</Button>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="mt-6">
+                      <h4 className="font-semibold mb-2">Pending Invites</h4>
+                      <ul className="space-y-2">
+                        {pendingInvites.length === 0 && <li className="text-gray-500">No pending invites.</li>}
+                        {pendingInvites.map(invite => (
+                          <li key={invite.id} className="flex items-center gap-2">
+                            <Avatar className="h-6 w-6"><AvatarFallback>{invite.member_email[0]}</AvatarFallback></Avatar>
+                            <span>{invite.member_email}</span>
+                            {user.id === invite.team_owner_id && (
+                              <>
+                                <Button size="sm" variant="secondary" onClick={() => handleResendInvite(invite.member_email)} disabled={inviteLoading}>Resend</Button>
+                                <Button size="sm" variant="destructive" onClick={() => handleCancelInvite(invite.id)} disabled={inviteLoading}>Cancel</Button>
+                              </>
+                            )}
                           </li>
                         ))}
                       </ul>
