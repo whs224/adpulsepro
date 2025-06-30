@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
@@ -26,9 +27,8 @@ const Header = () => {
 
   return (
     <header className="w-full bg-gradient-to-r from-blue-600 to-purple-600 shadow text-white py-4 px-8 flex items-center justify-between">
-      <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate("/")}> 
-        <img src="/lovable-uploads/42d2f28c-5627-4568-937d-18299a06a8a2.png" alt="AdPulse Logo" className="h-10 w-10 rounded-lg bg-white p-1 shadow" />
-        <span className="text-2xl font-bold">AdPulse</span>
+      <div className="flex items-center cursor-pointer" onClick={() => navigate("/")}> 
+        <img src="/lovable-uploads/0900788d-8c25-4db5-8fc6-cc23fa5ec613.png" alt="AdPulse" className="h-16 w-auto" />
       </div>
       <nav className="flex items-center gap-6">
         <Button variant="ghost" className="text-white hover:bg-blue-700" onClick={() => navigate("/dashboard")}>Dashboard</Button>
