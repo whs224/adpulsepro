@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowRight, MessageCircle, BarChart3 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -56,8 +55,7 @@ const Hero = () => {
             <Button 
               size="lg"
               onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-              className="bg-navy-800 hover:bg-navy-700 text-white px-8 py-6 text-lg"
-              style={{ backgroundColor: '#1e3a8a', borderColor: '#1e3a8a' }}
+              className="bg-slate-700 hover:bg-slate-600 text-white px-8 py-6 text-lg border border-slate-600 hover:border-slate-500 transition-all duration-300"
             >
               <BarChart3 className="mr-2 h-5 w-5" />
               See How It Works
