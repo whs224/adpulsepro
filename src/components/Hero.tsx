@@ -54,10 +54,10 @@ const Hero = () => {
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             <Button 
-              variant="outline" 
               size="lg"
               onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-              className="border-slate-500 text-white hover:bg-slate-700 hover:text-white px-8 py-6 text-lg"
+              className="bg-navy-800 hover:bg-navy-700 text-white px-8 py-6 text-lg"
+              style={{ backgroundColor: '#1e3a8a', borderColor: '#1e3a8a' }}
             >
               <BarChart3 className="mr-2 h-5 w-5" />
               See How It Works
