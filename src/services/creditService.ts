@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface UserCredits {
@@ -17,7 +16,18 @@ export interface UserCredits {
 export const getUserCredits = async (): Promise<UserCredits | null> => {
   try {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
+    if (!user) return {
+      id: '',
+      user_id: '',
+      plan_name: 'none',
+      total_credits: 0,
+      used_credits: 0,
+      max_team_members: 0,
+      billing_cycle_start: '',
+      billing_cycle_end: '',
+      is_active: false,
+      remaining_credits: 0
+    };
 
     const { data, error } = await supabase
       .from('user_credits')
@@ -26,9 +36,19 @@ export const getUserCredits = async (): Promise<UserCredits | null> => {
       .eq('is_active', true)
       .single();
 
-    if (error) {
-      console.error('Error fetching user credits:', error);
-      return null;
+    if (error || !data) {
+      return {
+        id: '',
+        user_id: user.id,
+        plan_name: 'none',
+        total_credits: 0,
+        used_credits: 0,
+        max_team_members: 0,
+        billing_cycle_start: '',
+        billing_cycle_end: '',
+        is_active: false,
+        remaining_credits: 0
+      };
     }
 
     return {
@@ -37,7 +57,18 @@ export const getUserCredits = async (): Promise<UserCredits | null> => {
     };
   } catch (error) {
     console.error('Error in getUserCredits:', error);
-    return null;
+    return {
+      id: '',
+      user_id: '',
+      plan_name: 'none',
+      total_credits: 0,
+      used_credits: 0,
+      max_team_members: 0,
+      billing_cycle_start: '',
+      billing_cycle_end: '',
+      is_active: false,
+      remaining_credits: 0
+    };
   }
 };
 

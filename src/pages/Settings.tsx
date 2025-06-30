@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/contexts/AuthContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
@@ -23,6 +23,57 @@ const Settings = () => {
   });
 
   const [selectedKPIs, setSelectedKPIs] = useState<string[]>([]);
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const [planName, setPlanName] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      loadTeam();
+      loadPlan();
+    }
+  }, [user]);
+
+  const loadPlan = async () => {
+    const { data, error } = await supabase
+      .from('user_credits')
+      .select('plan_name')
+      .eq('user_id', user.id)
+      .eq('is_active', true)
+      .single();
+    if (data) setPlanName(data.plan_name);
+  };
+
+  const loadTeam = async () => {
+    const { data, error } = await supabase
+      .from('team_members')
+      .select('*')
+      .or(`team_owner_id.eq.${user.id},member_user_id.eq.${user.id}`);
+    if (data) setTeamMembers(data);
+  };
+
+  const handleInvite = async () => {
+    setInviteLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('team_members')
+        .insert({
+          team_owner_id: user.id,
+          member_email: inviteEmail,
+          member_user_id: '',
+          is_active: false
+        });
+      if (error) throw error;
+      toast({ title: "Invite Sent", description: `Invitation sent to ${inviteEmail}` });
+      setInviteEmail("");
+      loadTeam();
+    } catch (err) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setInviteLoading(false);
+    }
+  };
 
   const kpiOptions = [
     { id: 'total_spend', label: 'Total Spend', description: 'Track total budget across campaigns' },
@@ -218,6 +269,40 @@ const Settings = () => {
                   )}
                 </CardContent>
               </Card>
+
+              {/* Team Management Section */}
+              {(planName === 'growth' || planName === 'scale') && (
+                <Card className="mb-8">
+                  <CardHeader>
+                    <CardTitle>Team Management</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="mb-4">
+                      <Label htmlFor="inviteEmail">Invite Team Member (email)</Label>
+                      <div className="flex gap-2 mt-2">
+                        <Input id="inviteEmail" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} placeholder="user@email.com" />
+                        <Button onClick={handleInvite} disabled={inviteLoading || !inviteEmail}>
+                          {inviteLoading ? 'Inviting...' : 'Invite'}
+                        </Button>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-2">Current Team Members</h4>
+                      <ul className="space-y-2">
+                        {teamMembers.length === 0 && <li className="text-gray-500">No team members yet.</li>}
+                        {teamMembers.map(member => (
+                          <li key={member.id} className="flex items-center gap-2">
+                            <Avatar className="h-6 w-6"><AvatarFallback>{member.member_email[0]}</AvatarFallback></Avatar>
+                            <span>{member.member_email}</span>
+                            <span className="text-xs text-gray-400">{member.role}</span>
+                            {member.member_user_id === user.id && <span className="text-xs text-blue-600">(You)</span>}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </div>
         </div>
