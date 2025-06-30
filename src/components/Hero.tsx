@@ -1,4 +1,5 @@
 
+
 import { Button } from "@/components/ui/button";
 import { ArrowRight, MessageCircle, BarChart3 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -57,7 +58,7 @@ const Hero = () => {
               size="lg"
               onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
               className="text-white px-8 py-6 text-lg border border-blue-500/30 hover:border-blue-400/50 transition-all duration-300"
-              style={{ backgroundColor: '#4169E1', '--tw-bg-opacity': '1' }}
+              style={{ backgroundColor: '#4169E1' }}
             >
               <BarChart3 className="mr-2 h-5 w-5" />
               See How It Works
@@ -92,3 +93,4 @@ const Hero = () => {
 };
 
 export default Hero;
+
