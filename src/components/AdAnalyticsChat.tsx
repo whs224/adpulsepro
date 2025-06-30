@@ -1,8 +1,7 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Send, Bot, User, AlertCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { checkAndUseCredit, getUserCredits } from "@/services/creditService";
@@ -154,16 +153,17 @@ const AdAnalyticsChat = () => {
 
   return (
     <div className="max-w-4xl mx-auto">
-      {remainingCredits !== null && (
-        <div className="mb-4 text-center">
-          <span className={`text-sm ${remainingCredits <= 10 ? 'text-yellow-600' : 'text-gray-600'}`}>
-            {remainingCredits} credits remaining this month
-          </span>
-        </div>
-      )}
-
-      <Card className="h-[600px] flex flex-col">
-        <CardContent className="flex-1 p-4 overflow-hidden flex flex-col">
+      <Card className="h-[600px] flex flex-col shadow-lg rounded-2xl bg-gradient-to-br from-white to-blue-50 border border-blue-100">
+        <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-t-2xl p-4">
+          <CardTitle className="text-white text-xl flex items-center gap-2">
+            <Bot className="h-5 w-5" />
+            AdPulse AI Assistant
+          </CardTitle>
+          <CardDescription className="text-blue-100 mt-1">
+            Ask questions about your ad performance. Each message uses 1 credit.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex-1 p-4 overflow-hidden flex flex-col bg-white/80 rounded-b-2xl">
           <div className="flex-1 overflow-y-auto space-y-4 mb-4">
             {messages.map((message) => (
               <div
@@ -173,7 +173,7 @@ const AdAnalyticsChat = () => {
                 }`}
               >
                 <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                  message.type === 'user' ? 'bg-blue-500' : 'bg-gray-500'
+                  message.type === 'user' ? 'bg-blue-500' : 'bg-purple-500'
                 }`}>
                   {message.type === 'user' ? (
                     <User className="h-4 w-4 text-white" />
@@ -191,7 +191,7 @@ const AdAnalyticsChat = () => {
                   }`}>
                     <p className="whitespace-pre-wrap">{message.content}</p>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-400 mt-1">
                     {message.timestamp.toLocaleTimeString()}
                   </p>
                 </div>
@@ -199,7 +199,7 @@ const AdAnalyticsChat = () => {
             ))}
             {isLoading && (
               <div className="flex items-start space-x-3">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center">
                   <Bot className="h-4 w-4 text-white" />
                 </div>
                 <div className="bg-gray-100 rounded-lg p-3">
@@ -213,24 +213,31 @@ const AdAnalyticsChat = () => {
             )}
             <div ref={messagesEndRef} />
           </div>
-
-          <div className="flex space-x-2">
+          <div className="flex space-x-2 mt-2">
             <Input
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Ask about your ad performance..."
               disabled={isLoading || (remainingCredits !== null && remainingCredits <= 0)}
-              className="flex-1"
+              className="flex-1 rounded-lg border border-blue-200 focus:ring-2 focus:ring-blue-400"
             />
             <Button
               onClick={handleSendMessage}
               disabled={!inputValue.trim() || isLoading || (remainingCredits !== null && remainingCredits <= 0)}
               size="icon"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 rounded-lg shadow"
             >
               <Send className="h-4 w-4" />
             </Button>
           </div>
+          {remainingCredits !== null && (
+            <div className="mt-2 text-center">
+              <span className={`text-xs ${remainingCredits <= 10 ? 'text-yellow-600' : 'text-gray-500'}`}>
+                {remainingCredits} credits remaining this month
+              </span>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
