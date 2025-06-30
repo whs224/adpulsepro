@@ -39,7 +39,12 @@ const Header = () => {
           <Button variant="ghost" className="text-white hover:bg-blue-700 text-lg" onClick={() => navigate("/admin")}>Admin</Button>
         )}
         {user ? (
-          <Button variant="outline" className="text-white border-white hover:bg-white/10 hover:text-white focus:bg-white/10 focus:text-white transition-colors" onClick={signOut}>
+          <Button
+            variant="outline"
+            className="text-white border-white hover:bg-white/20 hover:text-white focus:bg-white/20 focus:text-white transition-colors font-semibold"
+            style={{ borderColor: 'rgba(255,255,255,0.8)', color: '#fff', background: 'transparent' }}
+            onClick={signOut}
+          >
             Sign Out
           </Button>
         ) : (
