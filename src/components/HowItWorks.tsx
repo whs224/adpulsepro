@@ -38,7 +38,7 @@ const HowItWorks = () => {
             <h2 className="text-4xl font-bold text-white mb-4">
               How It Works
             </h2>
-            <p className="text-xl text-slate-300 max-w-2xl mx-auto">
+            <p className="text-xl text-slate-200 max-w-2xl mx-auto">
               Connect your accounts and start chatting with AI about your ad performance in 4 simple steps
             </p>
           </div>
@@ -56,7 +56,7 @@ const HowItWorks = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-slate-300 text-center leading-relaxed">
+                    <p className="text-slate-200 text-center leading-relaxed">
                       {step.description}
                     </p>
                   </CardContent>
