@@ -1,4 +1,5 @@
 
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
@@ -31,18 +32,18 @@ const Header = () => {
         <img src="/lovable-uploads/0900788d-8c25-4db5-8fc6-cc23fa5ec613.png" alt="AdPulse" className="h-16 w-auto" />
       </div>
       <nav className="flex items-center gap-6">
-        <Button variant="ghost" className="text-white hover:bg-blue-700" onClick={() => navigate("/dashboard")}>Dashboard</Button>
-        <Button variant="ghost" className="text-white hover:bg-blue-700" onClick={() => navigate("/pricing")}>Pricing</Button>
-        <Button variant="ghost" className="text-white hover:bg-blue-700" onClick={() => navigate("/settings")}>Settings</Button>
+        <Button variant="ghost" className="text-white hover:bg-blue-700 text-lg" onClick={() => navigate("/dashboard")}>Dashboard</Button>
+        <Button variant="ghost" className="text-white hover:bg-blue-700 text-lg" onClick={() => navigate("/pricing")}>Pricing</Button>
+        <Button variant="ghost" className="text-white hover:bg-blue-700 text-lg" onClick={() => navigate("/settings")}>Settings</Button>
         {isAdmin && (
-          <Button variant="ghost" className="text-white hover:bg-blue-700" onClick={() => navigate("/admin")}>Admin</Button>
+          <Button variant="ghost" className="text-white hover:bg-blue-700 text-lg" onClick={() => navigate("/admin")}>Admin</Button>
         )}
         {user ? (
           <Button variant="outline" className="text-white border-white hover:bg-white/10 hover:text-white focus:bg-white/10 focus:text-white transition-colors" onClick={signOut}>
             Sign Out
           </Button>
         ) : (
-          <Button variant="outline" className="text-white border-white hover:bg-white/10" onClick={() => navigate("/auth")}>Sign In</Button>
+          <Button variant="outline" className="text-blue-600 bg-white border-white hover:bg-gray-100 hover:text-blue-700 transition-colors" onClick={() => navigate("/auth")}>Sign In</Button>
         )}
       </nav>
     </header>
@@ -50,3 +51,4 @@ const Header = () => {
 };
 
 export default Header;
+
