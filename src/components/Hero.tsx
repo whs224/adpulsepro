@@ -57,7 +57,7 @@ const Hero = () => {
               variant="outline" 
               size="lg"
               onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-              className="border-slate-600 text-slate-300 hover:bg-slate-800 px-8 py-6 text-lg"
+              className="border-slate-600 text-slate-200 hover:bg-slate-800 hover:text-white px-8 py-6 text-lg"
             >
               <BarChart3 className="mr-2 h-5 w-5" />
               See How It Works
