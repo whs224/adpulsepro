@@ -29,7 +29,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('User preferences:', userPreferences);
 
     // Get the OpenAI API key from Supabase secrets
-    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+    const openaiApiKey = Deno.env.get('ChatGPT API');
     if (!openaiApiKey) {
       throw new Error('OpenAI API key not configured');
     }
