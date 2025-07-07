@@ -1,11 +1,12 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TrendingUp, Users, DollarSign, Target, MousePointer, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const kpiOptions = [
   {
@@ -54,19 +55,71 @@ const kpiOptions = [
 
 const KPISelector = () => {
   const [selectedKPIs, setSelectedKPIs] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const handleKPIToggle = (kpiId: string) => {
-    setSelectedKPIs(prev => 
-      prev.includes(kpiId) 
-        ? prev.filter(id => id !== kpiId)
-        : [...prev, kpiId]
-    );
+  useEffect(() => {
+    if (user) {
+      loadUserPreferences();
+    }
+  }, [user]);
+
+  const loadUserPreferences = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('user_preferences')
+        .select('selected_kpis')
+        .eq('user_id', user.id)
+        .single();
+
+      if (data && data.selected_kpis) {
+        setSelectedKPIs(data.selected_kpis);
+      }
+    } catch (error) {
+      console.error('Error loading user preferences:', error);
+    }
   };
 
-  const handleGenerateReport = () => {
+  const saveUserPreferences = async (kpis: string[]) => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from('user_preferences')
+        .upsert({
+          user_id: user.id,
+          selected_kpis: kpis
+        });
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error saving user preferences:', error);
+      toast({
+        title: "Error saving preferences",
+        description: "Your KPI preferences couldn't be saved. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleKPIToggle = async (kpiId: string) => {
+    const newSelectedKPIs = selectedKPIs.includes(kpiId) 
+      ? selectedKPIs.filter(id => id !== kpiId)
+      : [...selectedKPIs, kpiId];
+    
+    setSelectedKPIs(newSelectedKPIs);
+    
+    // Save to database immediately
+    if (user) {
+      await saveUserPreferences(newSelectedKPIs);
+    }
+  };
+
+  const handleGenerateReport = async () => {
     console.log('Generating report with KPIs:', selectedKPIs);
     
     if (selectedKPIs.length === 0) {
@@ -87,15 +140,28 @@ const KPISelector = () => {
       return;
     }
 
-    // Store selected KPIs in localStorage for the report page
-    localStorage.setItem('selectedKPIs', JSON.stringify(selectedKPIs));
+    setLoading(true);
     
-    toast({
-      title: "Redirecting to Report Generation",
-      description: "Taking you to the report page...",
-    });
-    
-    navigate('/report');
+    try {
+      // Save preferences one more time to ensure they're stored
+      await saveUserPreferences(selectedKPIs);
+      
+      toast({
+        title: "Redirecting to Report Generation",
+        description: "Taking you to the report page...",
+      });
+      
+      navigate('/report');
+    } catch (error) {
+      console.error('Error during report generation:', error);
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -159,11 +225,11 @@ const KPISelector = () => {
             
             <Button 
               onClick={handleGenerateReport}
-              disabled={selectedKPIs.length === 0}
+              disabled={selectedKPIs.length === 0 || loading}
               size="lg"
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3"
             >
-              Generate Report - $5 <span className="ml-2">📄</span>
+              {loading ? "Saving preferences..." : "Generate Report - $5"} <span className="ml-2">📄</span>
             </Button>
             
             {selectedKPIs.length === 0 && (

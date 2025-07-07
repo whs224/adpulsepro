@@ -6,8 +6,9 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { TrendingUp, TrendingDown, DollarSign, Eye, MousePointer, Target, Loader2 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { getStoredUserData } from "@/services/dataOrchestrator";
+import { getStoredUserData, syncCampaignData } from "@/services/dataOrchestrator";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Report = () => {
   const { user } = useAuth();
@@ -17,10 +18,59 @@ const Report = () => {
   const [reportData, setReportData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [hasConnectedAccounts, setHasConnectedAccounts] = useState(false);
+  const [userPreferences, setUserPreferences] = useState<any>(null);
+  const [syncingData, setSyncingData] = useState(false);
 
   useEffect(() => {
     loadReportData();
+    loadUserPreferences();
   }, []);
+
+  const loadUserPreferences = async () => {
+    try {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) return;
+
+      const { data } = await supabase
+        .from('user_preferences')
+        .select('*')
+        .eq('user_id', user.user.id)
+        .single();
+
+      if (data) {
+        setUserPreferences(data);
+      }
+    } catch (error) {
+      console.error('Error loading user preferences:', error);
+    }
+  };
+
+  const handleSyncData = async () => {
+    setSyncingData(true);
+    try {
+      const dateRange = {
+        start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        end: new Date().toISOString().split('T')[0]
+      };
+
+      await syncCampaignData(dateRange);
+      await loadReportData(); // Reload after sync
+      
+      toast({
+        title: "Data Synced Successfully",
+        description: "Your latest campaign data has been fetched from Google Ads",
+      });
+    } catch (error: any) {
+      console.error('Failed to sync data:', error);
+      toast({
+        title: "Sync Failed",
+        description: error.message || "Failed to sync campaign data. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSyncingData(false);
+    }
+  };
 
   const loadReportData = async () => {
     try {
@@ -158,7 +208,61 @@ const Report = () => {
               </p>
             </div>
           )}
+
+          {hasConnectedAccounts && (
+            <div className="mt-4 text-center">
+              <Button 
+                onClick={handleSyncData}
+                disabled={syncingData}
+                variant="outline"
+                size="sm"
+              >
+                {syncingData ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Syncing Google Ads Data...
+                  </>
+                ) : (
+                  "Sync Latest Data"
+                )}
+              </Button>
+            </div>
+          )}
         </div>
+
+        {/* KPI Preferences Display */}
+        {userPreferences?.selected_kpis?.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5 text-blue-600" />
+                Your Focus Areas
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                {userPreferences.selected_kpis.map((kpi: string) => {
+                  const kpiLabels: Record<string, string> = {
+                    'roas': 'Return on Ad Spend (ROAS)',
+                    'cpa': 'Cost Per Acquisition (CPA)',
+                    'ctr': 'Click-Through Rate (CTR)',
+                    'impressions': 'Impressions & Reach',
+                    'conversions': 'Conversion Rate',
+                    'audience': 'Audience Quality'
+                  };
+                  return (
+                    <span key={kpi} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                      {kpiLabels[kpi] || kpi}
+                    </span>
+                  );
+                })}
+              </div>
+              <p className="text-sm text-gray-600 mt-2">
+                AI analysis and recommendations are tailored to these priorities
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Executive Summary */}
         <Card className="mb-8">

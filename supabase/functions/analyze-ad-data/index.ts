@@ -9,6 +9,11 @@ interface AnalysisRequest {
   question: string;
   campaignData: any[];
   connectedAccounts: Array<{platform: string; account_name: string}>;
+  userPreferences?: {
+    selected_kpis?: string[];
+    business_goals?: string;
+    primary_objective?: string;
+  };
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -17,10 +22,11 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { question, campaignData, connectedAccounts }: AnalysisRequest = await req.json();
+    const { question, campaignData, connectedAccounts, userPreferences }: AnalysisRequest = await req.json();
     console.log('Analyzing ad data question:', question);
     console.log('Campaign data count:', campaignData.length);
     console.log('Connected accounts:', connectedAccounts);
+    console.log('User preferences:', userPreferences);
 
     // Get the OpenAI API key from Supabase secrets
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
@@ -60,19 +66,36 @@ ${dataContext ? `
 - Total conversions: ${dataContext.totalMetrics.conversions || '0'}
 ` : '- No campaign data available yet'}
 
+User's KPI Preferences: ${userPreferences?.selected_kpis?.length ? userPreferences.selected_kpis.join(', ') : 'Not specified'}
+Business Goals: ${userPreferences?.business_goals || 'Not specified'}
+Primary Objective: ${userPreferences?.primary_objective || 'Not specified'}
+
 Campaign Data Available:
 ${JSON.stringify(campaignData.slice(0, 10), null, 2)}
 ${campaignData.length > 10 ? `... and ${campaignData.length - 10} more campaigns` : ''}
 
 Instructions:
+- PRIORITIZE analysis around the user's selected KPIs: ${userPreferences?.selected_kpis?.map(kpi => {
+  const kpiMap: Record<string, string> = {
+    'roas': 'Return on Ad Spend (ROAS) - focus on revenue optimization',
+    'cpa': 'Cost Per Acquisition (CPA) - focus on efficient customer acquisition',
+    'ctr': 'Click-Through Rate (CTR) - focus on ad engagement and relevance',
+    'impressions': 'Impressions & Reach - focus on brand visibility and awareness',
+    'conversions': 'Conversion Rate - focus on conversion optimization',
+    'audience': 'Audience Quality - focus on targeting and audience insights'
+  };
+  return kpiMap[kpi] || kpi;
+}).join('; ') || 'general performance metrics'}
+- When no specific KPIs are selected, provide balanced analysis across all metrics
 - Provide specific, data-driven answers when campaign data is available
 - If no data is available, explain what they need to do (connect accounts, wait for data sync)
 - Use actual numbers and percentages from their data
 - Compare performance across platforms when relevant
-- Suggest actionable optimizations based on their actual performance
+- Suggest actionable optimizations based on their actual performance AND their KPI priorities
 - Be conversational and helpful, like a knowledgeable marketing consultant
 - If they ask about time periods not in the data, explain the available date range
-- Keep responses concise but informative (2-3 paragraphs max unless they ask for details)`;
+- Keep responses concise but informative (2-3 paragraphs max unless they ask for details)
+- Always relate insights back to their chosen KPI focus areas when applicable`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',

@@ -85,21 +85,28 @@ const AdAnalyticsChat = () => {
       // Update remaining credits
       await loadCredits();
 
-      // Get user's campaign data and connected accounts
-      const [campaignResponse, accountsResponse] = await Promise.all([
+      // Get user's campaign data, connected accounts, and preferences
+      const [campaignResponse, accountsResponse, preferencesResponse] = await Promise.all([
         supabase.from('campaign_data').select('*').eq('user_id', user.id),
-        supabase.from('ad_accounts').select('platform, account_name').eq('user_id', user.id).eq('is_active', true)
+        supabase.from('ad_accounts').select('platform, account_name').eq('user_id', user.id).eq('is_active', true),
+        supabase.from('user_preferences').select('*').eq('user_id', user.id).single()
       ]);
 
       const campaignData = campaignResponse.data || [];
       const connectedAccounts = accountsResponse.data || [];
+      const userPreferences = preferencesResponse.data || null;
 
       // Call the analyze-ad-data edge function
       const { data, error } = await supabase.functions.invoke('analyze-ad-data', {
         body: {
           question: userMessage.content,
           campaignData,
-          connectedAccounts
+          connectedAccounts,
+          userPreferences: userPreferences ? {
+            selected_kpis: userPreferences.selected_kpis || [],
+            business_goals: userPreferences.business_goals,
+            primary_objective: userPreferences.primary_objective
+          } : undefined
         }
       });
 

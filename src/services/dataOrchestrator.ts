@@ -18,102 +18,49 @@ export const fetchAllUserData = async (dateRange: { start: string; end: string }
   const { data: user } = await supabase.auth.getUser();
   if (!user.user) throw new Error('User not authenticated');
 
-  // Get user's connected ad accounts
-  const { data: adAccounts, error: accountsError } = await supabase
-    .from('ad_accounts')
-    .select('*')
-    .eq('user_id', user.user.id)
-    .eq('is_active', true);
-
-  if (accountsError) throw accountsError;
-  if (!adAccounts || adAccounts.length === 0) {
-    throw new Error('No connected ad accounts found. Please connect your ad accounts in Settings.');
-  }
-
-  console.log(`Found ${adAccounts.length} connected accounts`);
-
-  // Fetch data from each platform
-  const allCampaignData = [];
-  
-  for (const account of adAccounts) {
-    console.log(`Fetching data for ${account.platform} account: ${account.account_name}`);
-    
-    let campaignData = [];
-    
-    try {
-      switch (account.platform) {
-        case 'google_ads':
-          campaignData = await fetchGoogleAdsData(account.access_token, account.account_id, dateRange);
-          break;
-        case 'meta_ads':
-          campaignData = await fetchMetaAdsData(account.access_token, account.account_id, dateRange);
-          break;
-        case 'tiktok_ads':
-          // campaignData = await fetchTikTokAdsData(account.access_token, account.account_id, dateRange);
-          console.log('TikTok Ads integration coming soon');
-          break;
-        case 'linkedin_ads':
-          // campaignData = await fetchLinkedInAdsData(account.access_token, account.account_id, dateRange);
-          console.log('LinkedIn Ads integration coming soon');
-          break;
-        default:
-          console.warn(`Unknown platform: ${account.platform}`);
-      }
-
-      if (campaignData.length > 0) {
-        // Store the fetched data
-        await storeCampaignData(campaignData, account.id);
-        allCampaignData.push(...campaignData);
-      }
-    } catch (error) {
-      console.error(`Failed to fetch data for ${account.platform}:`, error);
-      // Continue with other accounts even if one fails
-    }
-  }
-
-  if (allCampaignData.length === 0) {
-    throw new Error('No campaign data could be fetched from connected accounts');
-  }
-
-  console.log(`Fetched ${allCampaignData.length} campaigns total`);
-
-  // Get user's business goals for context
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.user.id)
-    .single();
-
-  // Analyze with OpenAI
-  console.log('Starting OpenAI analysis...');
-  const analysis = await analyzeWithOpenAI({
-    campaignData: allCampaignData,
-    dateRange,
-    userGoals: profile?.full_name || undefined
-  });
-
-  // Store the analysis results
-  const { error: analysisError } = await supabase
-    .from('ai_analysis')
-    .insert({
-      user_id: user.user.id,
-      date_range_start: dateRange.start,
-      date_range_end: dateRange.end,
-      raw_data: allCampaignData,
-      ai_insights: analysis.insights,
-      recommendations: analysis.recommendations
+  // First try to fetch fresh data from connected accounts using edge function
+  try {
+    const { data, error } = await supabase.functions.invoke('fetch-campaign-data', {
+      body: { dateRange }
     });
 
-  if (analysisError) {
-    console.error('Failed to store analysis:', analysisError);
-    // Don't throw - we can still return the analysis
+    if (error) {
+      console.error('Error fetching fresh campaign data:', error);
+      throw error;
+    }
+
+    if (data && data.campaigns && data.campaigns.length > 0) {
+      console.log(`Fetched ${data.campaigns.length} fresh campaigns`);
+      return {
+        campaigns: data.campaigns,
+        analysis: await getLatestAnalysis(user.user.id, dateRange),
+        connectedAccounts: data.connectedAccounts || 0
+      };
+    }
+  } catch (error) {
+    console.error('Fresh data fetch failed, falling back to stored data:', error);
   }
 
-  return {
-    campaigns: allCampaignData,
-    analysis,
-    connectedAccounts: adAccounts.length
-  };
+  // Fallback to stored data if fresh fetch fails
+  return await getStoredUserData(dateRange);
+};
+
+const getLatestAnalysis = async (userId: string, dateRange: { start: string; end: string }) => {
+  const { data: analysis } = await supabase
+    .from('ai_analysis')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('date_range_start', dateRange.start)
+    .eq('date_range_end', dateRange.end)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  return analysis ? {
+    insights: analysis.ai_insights,
+    recommendations: analysis.recommendations,
+    keyMetrics: calculateKeyMetrics(Array.isArray(analysis.raw_data) ? analysis.raw_data : [])
+  } : null;
 };
 
 export const getStoredUserData = async (dateRange: { start: string; end: string }) => {
@@ -121,33 +68,56 @@ export const getStoredUserData = async (dateRange: { start: string; end: string 
   const campaignData = await getUserCampaignData(dateRange);
   
   if (!campaignData || campaignData.length === 0) {
-    // No stored data, fetch fresh
-    return await fetchAllUserData(dateRange);
+    // No stored data, try to fetch fresh
+    try {
+      return await fetchAllUserData(dateRange);
+    } catch (error) {
+      console.error('No data available:', error);
+      throw new Error('No campaign data available. Please connect your ad accounts and try again.');
+    }
   }
 
   // Get stored analysis
   const { data: user } = await supabase.auth.getUser();
   if (!user.user) throw new Error('User not authenticated');
 
-  const { data: analysis } = await supabase
-    .from('ai_analysis')
-    .select('*')
-    .eq('user_id', user.user.id)
-    .eq('date_range_start', dateRange.start)
-    .eq('date_range_end', dateRange.end)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single();
+  const analysis = await getLatestAnalysis(user.user.id, dateRange);
 
   return {
     campaigns: campaignData,
-    analysis: analysis ? {
-      insights: analysis.ai_insights,
-      recommendations: analysis.recommendations,
+    analysis: analysis || {
+      insights: null,
+      recommendations: [],
       keyMetrics: calculateKeyMetrics(campaignData)
-    } : null,
+    },
     connectedAccounts: [...new Set(campaignData.map(c => c.ad_accounts.platform))].length
   };
+};
+
+export const syncCampaignData = async (dateRange?: { start: string; end: string }) => {
+  const defaultDateRange = dateRange || {
+    start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    end: new Date().toISOString().split('T')[0]
+  };
+
+  try {
+    console.log('Syncing campaign data for date range:', defaultDateRange);
+    
+    const { data, error } = await supabase.functions.invoke('fetch-campaign-data', {
+      body: { dateRange: defaultDateRange }
+    });
+
+    if (error) {
+      console.error('Error syncing campaign data:', error);
+      throw error;
+    }
+
+    console.log('Campaign data synced successfully:', data);
+    return data;
+  } catch (error) {
+    console.error('Failed to sync campaign data:', error);
+    throw error;
+  }
 };
 
 const calculateKeyMetrics = (campaignData: any[]) => {
