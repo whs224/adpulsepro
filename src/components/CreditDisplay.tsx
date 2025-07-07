@@ -42,6 +42,30 @@ const CreditDisplay = () => {
     );
   }
 
+  // Handle users with no subscription
+  if (!credits.is_active || credits.plan_name === 'none') {
+    return (
+      <Card className="bg-orange-50 border-orange-200">
+        <CardContent className="p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CreditCard className="h-4 w-4 text-orange-600" />
+              <span className="font-medium text-gray-900">
+                No active subscription
+              </span>
+            </div>
+            <Badge variant="outline">
+              Free
+            </Badge>
+          </div>
+          <p className="text-orange-700 text-sm">
+            Subscribe to get credits and access premium features.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const isLowCredits = credits.remaining_credits <= 10;
   const cycleEndDate = new Date(credits.billing_cycle_end).toLocaleDateString();
 
