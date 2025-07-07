@@ -74,7 +74,7 @@ const Settings = () => {
         .insert({
           team_owner_id: user.id,
           member_email: inviteEmail,
-          member_user_id: '',
+          member_user_id: null,
           is_active: false
         });
       if (error) throw error;
