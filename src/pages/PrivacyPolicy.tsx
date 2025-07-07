@@ -208,7 +208,7 @@ const PrivacyPolicy = () => {
               <CardContent className="prose prose-gray max-w-none">
                 <p>If you have any questions about this Privacy Policy, please contact us:</p>
                 <ul className="list-none space-y-2">
-                  <li><strong>Email:</strong> <a href="mailto:contact@adpulse.pro" className="text-blue-600 hover:underline">contact@adpulse.pro</a></li>
+                  <li><strong>Email:</strong> <a href="mailto:proadpulse@gmail.com" className="text-blue-600 hover:underline">proadpulse@gmail.com</a></li>
                   <li><strong>Phone:</strong> <a href="tel:415-317-6427" className="text-blue-600 hover:underline">415-317-6427</a></li>
                 </ul>
               </CardContent>

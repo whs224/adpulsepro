@@ -129,8 +129,8 @@ const About = () => {
                 <div className="flex flex-col md:flex-row gap-4 justify-center items-center">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold">📧</span>
-                    <a href="mailto:contact@adpulse.pro" className="text-blue-600 hover:underline text-lg">
-                      contact@adpulse.pro
+                    <a href="mailto:proadpulse@gmail.com" className="text-blue-600 hover:underline text-lg">
+                      proadpulse@gmail.com
                     </a>
                   </div>
                   <div className="flex items-center gap-2">

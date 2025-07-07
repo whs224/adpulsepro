@@ -50,7 +50,7 @@ const AIAssistant = () => {
         "AdPulse makes advertising simple - just ask me questions in plain English about your campaign performance once you've connected your accounts.",
         "Need help getting started? Go to your dashboard to connect your advertising accounts, then come back and ask me about your performance data!",
         "I can analyze your ad performance across all platforms once you've connected your accounts. Try asking something like 'How are my Google Ads performing this week?'",
-        "For technical support or account questions, please contact our team at contact@adpulse.pro or 415-317-6427."
+        "For technical support or account questions, please contact our team at proadpulse@gmail.com or 415-317-6427."
       ];
       
       const randomResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];

@@ -87,7 +87,7 @@ const TermsOfService = () => {
                     If you have any questions about these Terms of Service, please contact us at:
                   </p>
                   <div className="mt-4 space-y-2">
-                    <p className="text-gray-600"><strong>Email:</strong> contact@adpulse.pro</p>
+                    <p className="text-gray-600"><strong>Email:</strong> proadpulse@gmail.com</p>
                     <p className="text-gray-600"><strong>Phone:</strong> 415-317-6427</p>
                   </div>
                 </section>

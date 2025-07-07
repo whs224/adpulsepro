@@ -19,7 +19,7 @@ const Footer = () => {
               <div className="flex space-x-4">
                 <a href="#" className="text-slate-400 hover:text-white transition-colors">Twitter</a>
                 <a href="#" className="text-slate-400 hover:text-white transition-colors">LinkedIn</a>
-                <a href="mailto:contact@adpulse.pro" className="text-slate-400 hover:text-white transition-colors">Support</a>
+                <a href="mailto:proadpulse@gmail.com" className="text-slate-400 hover:text-white transition-colors">Support</a>
               </div>
             </div>
             

@@ -56,8 +56,8 @@ const PaymentSuccess = () => {
                     Don't see the email? Check your spam folder or contact us:
                   </p>
                   <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                    <a href="mailto:contact@adpulse.pro" className="text-blue-600 hover:underline">
-                      contact@adpulse.pro
+                    <a href="mailto:proadpulse@gmail.com" className="text-blue-600 hover:underline">
+                      proadpulse@gmail.com
                     </a>
                     <span className="hidden sm:inline text-gray-400">•</span>
                     <a href="tel:415-317-6427" className="text-blue-600 hover:underline">
