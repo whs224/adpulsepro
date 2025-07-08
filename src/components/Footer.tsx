@@ -1,4 +1,6 @@
 
+import { Link } from 'react-router-dom';
+
 const Footer = () => {
   return (
     <footer className="bg-slate-900 text-white py-12 border-t border-slate-800">
@@ -26,20 +28,20 @@ const Footer = () => {
             <div>
               <h3 className="font-semibold mb-4 text-white">Product</h3>
               <ul className="space-y-2 text-slate-400">
-                <li><a href="/#features" className="hover:text-white transition-colors">Features</a></li>
-                <li><a href="/pricing" className="hover:text-white transition-colors">Pricing</a></li>
-                <li><a href="/#how-it-works" className="hover:text-white transition-colors">How it Works</a></li>
-                <li><a href="/faq" className="hover:text-white transition-colors">FAQ</a></li>
+                <li><Link to="/#features" className="hover:text-white transition-colors">Features</Link></li>
+                <li><Link to="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
+                <li><Link to="/#how-it-works" className="hover:text-white transition-colors">How it Works</Link></li>
+                <li><Link to="/faq" className="hover:text-white transition-colors">FAQ</Link></li>
               </ul>
             </div>
             
             <div>
               <h3 className="font-semibold mb-4 text-white">Company</h3>
               <ul className="space-y-2 text-slate-400">
-                <li><a href="/about" className="hover:text-white transition-colors">About</a></li>
-                <li><a href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</a></li>
-                <li><a href="/contact" className="hover:text-white transition-colors">Contact</a></li>
+                <li><Link to="/about" className="hover:text-white transition-colors">About</Link></li>
+                <li><Link to="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                <li><Link to="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</Link></li>
+                <li><Link to="/contact" className="hover:text-white transition-colors">Contact</Link></li>
               </ul>
             </div>
           </div>
