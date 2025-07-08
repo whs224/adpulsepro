@@ -62,31 +62,39 @@ const Admin = () => {
         console.error('Error loading profiles:', profilesError);
       }
 
-      // For each user, get their email from auth
-      const usersWithData = await Promise.all(
-        userCreditsData?.map(async (userCredit) => {
-          try {
-            // Get user profile
-            const profile = profilesData?.find(p => p.id === userCredit.user_id);
-            
-            // Get user email from auth
-            const { data: authData, error: authError } = await supabase.auth.admin.getUserById(userCredit.user_id);
-            
-            return {
-              ...userCredit,
-              full_name: profile?.full_name || 'No name',
-              user_email: authData?.user?.email || (authError ? 'Email fetch failed' : 'No email')
-            };
-          } catch (error) {
-            console.error('Error processing user:', userCredit.user_id, error);
-            return {
-              ...userCredit,
-              full_name: 'No name',
-              user_email: 'Error loading email'
-            };
+      // Get user details from edge function
+      const userIds = userCreditsData?.map(uc => uc.user_id) || [];
+      
+      let userDetailsMap = new Map();
+      if (userIds.length > 0) {
+        try {
+          const { data: userDetailsResponse, error: userDetailsError } = await supabase.functions.invoke('fetch-user-details', {
+            body: { userIds }
+          });
+
+          if (userDetailsError) {
+            console.error('Error fetching user details:', userDetailsError);
+          } else {
+            userDetailsResponse?.userDetails?.forEach((detail: any) => {
+              userDetailsMap.set(detail.user_id, detail);
+            });
           }
-        }) || []
-      );
+        } catch (error) {
+          console.error('Error calling fetch-user-details function:', error);
+        }
+      }
+
+      // Combine all data
+      const usersWithData = userCreditsData?.map((userCredit) => {
+        const profile = profilesData?.find(p => p.id === userCredit.user_id);
+        const userDetails = userDetailsMap.get(userCredit.user_id);
+        
+        return {
+          ...userCredit,
+          full_name: userDetails?.full_name || profile?.full_name || 'No name',
+          user_email: userDetails?.email || 'No email'
+        };
+      }) || [];
 
       console.log('Users with data:', usersWithData);
       setUsers(usersWithData);
