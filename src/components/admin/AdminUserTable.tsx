@@ -14,6 +14,7 @@ interface AdminUserTableProps {
   onUpdateCredits: (userId: string) => void;
   onUpdatePlan: (userId: string) => void;
   onDeleteUser: (userId: string) => void;
+  onGiveCredits: (userId: string, credits: number) => void;
 }
 
 export const AdminUserTable = ({
@@ -26,7 +27,8 @@ export const AdminUserTable = ({
   onPlanChange,
   onUpdateCredits,
   onUpdatePlan,
-  onDeleteUser
+  onDeleteUser,
+  onGiveCredits
 }: AdminUserTableProps) => {
   return (
     <div className="overflow-x-auto">
@@ -82,7 +84,32 @@ export const AdminUserTable = ({
                 </span>
               </td>
               <td className="p-3">
-                <UserActionsCell user={u} onDelete={onDeleteUser} />
+                <div className="flex flex-col gap-2">
+                  <UserActionsCell user={u} onDelete={onDeleteUser} />
+                  <div className="flex items-center gap-2">
+                    <Input 
+                      type="number" 
+                      placeholder="Credits to give" 
+                      className="w-24 text-xs" 
+                      id={`give-credits-${u.user_id}`}
+                    />
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => {
+                        const input = document.getElementById(`give-credits-${u.user_id}`) as HTMLInputElement;
+                        const credits = parseInt(input.value);
+                        if (credits > 0) {
+                          onGiveCredits(u.user_id, credits);
+                          input.value = '';
+                        }
+                      }}
+                      className="text-xs whitespace-nowrap"
+                    >
+                      Give Credits
+                    </Button>
+                  </div>
+                </div>
               </td>
             </tr>
           ))}

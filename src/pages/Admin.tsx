@@ -20,7 +20,8 @@ const Admin = () => {
     handlePlanChange,
     updateCredits,
     updatePlan,
-    deleteUser
+    deleteUser,
+    giveCreditsToUser
   } = useAdminUsers();
 
   const { searchTerm, setSearchTerm, filteredUsers } = useUserSearch(users);
@@ -61,6 +62,7 @@ const Admin = () => {
               onUpdateCredits={updateCredits}
               onUpdatePlan={updatePlan}
               onDeleteUser={deleteUser}
+              onGiveCredits={giveCreditsToUser}
             />
           </CardContent>
         </Card>

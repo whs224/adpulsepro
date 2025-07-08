@@ -214,6 +214,70 @@ export const useAdminUsers = () => {
     loadUsers();
   }, []);
 
+  const giveCreditsToUser = async (userId: string, credits: number) => {
+    setLoading(true);
+    try {
+      if (credits <= 0) {
+        toast({ title: 'Credits must be greater than 0', variant: 'destructive' });
+        setLoading(false);
+        return;
+      }
+
+      // Check if user already has active credits
+      const { data: existingCredits } = await supabase
+        .from('user_credits')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .single();
+
+      if (existingCredits) {
+        // Update existing credits
+        const { error } = await supabase
+          .from('user_credits')
+          .update({ 
+            total_credits: existingCredits.total_credits + credits,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', userId);
+
+        if (error) {
+          console.error('Error updating credits:', error);
+          toast({ title: 'Failed to add credits', description: error.message, variant: 'destructive' });
+        } else {
+          toast({ title: `Successfully added ${credits} credits to user` });
+          await loadUsers();
+        }
+      } else {
+        // Create new credit record for non-subscribed user
+        const { error } = await supabase
+          .from('user_credits')
+          .insert({
+            user_id: userId,
+            plan_name: 'admin_given',
+            total_credits: credits,
+            used_credits: 0,
+            max_team_members: 1,
+            billing_cycle_start: new Date().toISOString(),
+            billing_cycle_end: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 year from now
+            is_active: true
+          });
+
+        if (error) {
+          console.error('Error creating credits:', error);
+          toast({ title: 'Failed to give credits', description: error.message, variant: 'destructive' });
+        } else {
+          toast({ title: `Successfully gave ${credits} credits to user` });
+          await loadUsers();
+        }
+      }
+    } catch (error) {
+      console.error('Error giving credits:', error);
+      toast({ title: 'Failed to give credits', variant: 'destructive' });
+    }
+    setLoading(false);
+  };
+
   return {
     users,
     loading,
@@ -224,6 +288,7 @@ export const useAdminUsers = () => {
     handlePlanChange,
     updateCredits,
     updatePlan,
-    deleteUser
+    deleteUser,
+    giveCreditsToUser
   };
 };
