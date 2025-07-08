@@ -175,28 +175,14 @@ export const useAdminUsers = () => {
   const deleteUser = async (userId: string) => {
     setLoading(true);
     try {
-      // Delete from user_credits first
-      const { error: creditsError } = await supabase
-        .from('user_credits')
-        .delete()
-        .eq('user_id', userId);
+      // Delete auth user first using admin client
+      const { error: deleteAuthError } = await supabase.functions.invoke('delete-user', {
+        body: { userId }
+      });
 
-      if (creditsError) {
-        console.error('Error deleting user credits:', creditsError);
-        toast({ title: 'Failed to delete user credits', description: creditsError.message, variant: 'destructive' });
-        setLoading(false);
-        return;
-      }
-
-      // Delete from profiles
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', userId);
-
-      if (profileError) {
-        console.error('Error deleting user profile:', profileError);
-        toast({ title: 'Failed to delete user profile', description: profileError.message, variant: 'destructive' });
+      if (deleteAuthError) {
+        console.error('Error deleting auth user:', deleteAuthError);
+        toast({ title: 'Failed to delete auth user', description: deleteAuthError.message, variant: 'destructive' });
         setLoading(false);
         return;
       }
@@ -223,20 +209,20 @@ export const useAdminUsers = () => {
         return;
       }
 
-      // Check if user already has active credits
+      // Check if user already has any credits (active or inactive)
       const { data: existingCredits } = await supabase
         .from('user_credits')
         .select('*')
         .eq('user_id', userId)
-        .eq('is_active', true)
-        .single();
+        .maybeSingle();
 
       if (existingCredits) {
-        // Update existing credits
+        // Update existing credits and make them active
         const { error } = await supabase
           .from('user_credits')
           .update({ 
             total_credits: existingCredits.total_credits + credits,
+            is_active: true,
             updated_at: new Date().toISOString()
           })
           .eq('user_id', userId);
@@ -249,7 +235,7 @@ export const useAdminUsers = () => {
           await loadUsers();
         }
       } else {
-        // Create new credit record for non-subscribed user
+        // Create new credit record for new user
         const { error } = await supabase
           .from('user_credits')
           .insert({
