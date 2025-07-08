@@ -6,7 +6,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Search } from "lucide-react";
+import { Search, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const Admin = () => {
   const { user } = useAuth();
@@ -40,19 +41,19 @@ const Admin = () => {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      // First get all user credits with profile data
+      // Get user credits first
       const { data: userCreditsData, error: creditsError } = await supabase
         .from('user_credits')
         .select('user_id, plan_name, total_credits, used_credits, is_active');
       
       if (creditsError) {
         console.error('Error loading user credits:', creditsError);
-        toast({ title: 'Error loading user credits', variant: 'destructive' });
+        toast({ title: 'Error loading user credits', description: creditsError.message, variant: 'destructive' });
         setLoading(false);
         return;
       }
 
-      // Get profile data separately to avoid join issues
+      // Get profiles separately
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('id, full_name');
@@ -61,27 +62,38 @@ const Admin = () => {
         console.error('Error loading profiles:', profilesError);
       }
 
-      // Get auth users data using service role
-      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
-      
-      // Combine the data
-      const combinedData = userCreditsData?.map(credit => {
-        const profile = profilesData?.find(p => p.id === credit.user_id);
-        const authUser = authUsers?.users?.find(u => u.id === credit.user_id);
-        
-        return {
-          ...credit,
-          full_name: profile?.full_name || 'No name',
-          user_email: authUser?.email || 'No email'
-        };
-      }) || [];
+      // For each user, get their email from auth
+      const usersWithData = await Promise.all(
+        userCreditsData?.map(async (userCredit) => {
+          try {
+            // Get user profile
+            const profile = profilesData?.find(p => p.id === userCredit.user_id);
+            
+            // Get user email from auth
+            const { data: authData, error: authError } = await supabase.auth.admin.getUserById(userCredit.user_id);
+            
+            return {
+              ...userCredit,
+              full_name: profile?.full_name || 'No name',
+              user_email: authData?.user?.email || (authError ? 'Email fetch failed' : 'No email')
+            };
+          } catch (error) {
+            console.error('Error processing user:', userCredit.user_id, error);
+            return {
+              ...userCredit,
+              full_name: 'No name',
+              user_email: 'Error loading email'
+            };
+          }
+        }) || []
+      );
 
-      console.log('Combined user data:', combinedData);
-      setUsers(combinedData);
-      setFilteredUsers(combinedData);
+      console.log('Users with data:', usersWithData);
+      setUsers(usersWithData);
+      setFilteredUsers(usersWithData);
     } catch (error) {
       console.error('Error in loadUsers:', error);
-      toast({ title: 'Error loading users', variant: 'destructive' });
+      toast({ title: 'Error loading users', description: 'Failed to load user data', variant: 'destructive' });
     }
     setLoading(false);
   };
@@ -212,14 +224,42 @@ const Admin = () => {
                         </span>
                       </td>
                       <td className="p-3">
-                        <Button 
-                          size="sm" 
-                          variant="destructive" 
-                          onClick={() => deleteUser(u.user_id)}
-                          className="whitespace-nowrap"
-                        >
-                          Delete
-                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button 
+                              size="sm" 
+                              variant="destructive" 
+                              className="whitespace-nowrap"
+                            >
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              Delete
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete User Account</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete this user account? This action will:
+                                <br />• Remove all user data and credits
+                                <br />• Delete their profile information
+                                <br />• This action cannot be undone
+                                <br /><br />
+                                <strong>User:</strong> {u.user_email}
+                                <br />
+                                <strong>Name:</strong> {u.full_name}
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction 
+                                onClick={() => deleteUser(u.user_id)}
+                                className="bg-red-600 hover:bg-red-700"
+                              >
+                                Yes, Delete User
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </td>
                     </tr>
                   ))}
