@@ -9,19 +9,19 @@ const corsHeaders = {
 
 const pricingPlans = {
   starter: {
-    priceId: "price_1RfQvdCyYA7DMxOTgUg5vp7c", // Update this with your live price ID from Stripe dashboard
+    priceId: "price_1RIPJeCr6IHSKbXh9XgQJxjt", // Live Starter price ID
     credits: 100,
     maxTeamMembers: 1,
     price: 29
   },
   growth: {
-    priceId: "price_1RfQw7CyYA7DMxOTvR6UFpk6", // Update this with your live price ID from Stripe dashboard
+    priceId: "price_1RIPJoCr6IHSKbXh2ZfamqvN", // Live Growth price ID
     credits: 500,
     maxTeamMembers: 3,
     price: 79
   },
   scale: {
-    priceId: "price_1RfQxbCyYA7DMxOTbb62pFVm", // Update this with your live price ID from Stripe dashboard
+    priceId: "price_1RIPJZCr6IHSKbXh1ZGj7eU4", // Live Scale price ID
     credits: 2000,
     maxTeamMembers: 10,
     price: 199
