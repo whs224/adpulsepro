@@ -96,28 +96,117 @@ export const useAdminUsers = () => {
 
   const updateCredits = async (userId: string) => {
     setLoading(true);
-    const credits = creditEdit[userId];
-    await supabase.from('user_credits').update({ total_credits: credits }).eq('user_id', userId);
-    toast({ title: 'Credits updated' });
-    loadUsers();
+    try {
+      const credits = creditEdit[userId];
+      
+      if (credits === undefined || credits < 0) {
+        toast({ title: 'Invalid credits value', variant: 'destructive' });
+        setLoading(false);
+        return;
+      }
+
+      const { error } = await supabase
+        .from('user_credits')
+        .update({ 
+          total_credits: credits,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId);
+
+      if (error) {
+        console.error('Error updating credits:', error);
+        toast({ title: 'Failed to update credits', description: error.message, variant: 'destructive' });
+      } else {
+        toast({ title: 'Credits updated successfully' });
+        // Clear the edit state for this user
+        setCreditEdit(prev => {
+          const newState = { ...prev };
+          delete newState[userId];
+          return newState;
+        });
+        await loadUsers();
+      }
+    } catch (error) {
+      console.error('Error updating credits:', error);
+      toast({ title: 'Failed to update credits', variant: 'destructive' });
+    }
     setLoading(false);
   };
 
   const updatePlan = async (userId: string) => {
     setLoading(true);
-    const plan = planEdit[userId];
-    await supabase.from('user_credits').update({ plan_name: plan }).eq('user_id', userId);
-    toast({ title: 'Plan updated' });
-    loadUsers();
+    try {
+      const plan = planEdit[userId];
+      
+      if (!plan || plan.trim() === '') {
+        toast({ title: 'Plan name cannot be empty', variant: 'destructive' });
+        setLoading(false);
+        return;
+      }
+
+      const { error } = await supabase
+        .from('user_credits')
+        .update({ 
+          plan_name: plan.trim(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId);
+
+      if (error) {
+        console.error('Error updating plan:', error);
+        toast({ title: 'Failed to update plan', description: error.message, variant: 'destructive' });
+      } else {
+        toast({ title: 'Plan updated successfully' });
+        // Clear the edit state for this user
+        setPlanEdit(prev => {
+          const newState = { ...prev };
+          delete newState[userId];
+          return newState;
+        });
+        await loadUsers();
+      }
+    } catch (error) {
+      console.error('Error updating plan:', error);
+      toast({ title: 'Failed to update plan', variant: 'destructive' });
+    }
     setLoading(false);
   };
 
   const deleteUser = async (userId: string) => {
     setLoading(true);
-    await supabase.from('user_credits').delete().eq('user_id', userId);
-    await supabase.from('profiles').delete().eq('id', userId);
-    toast({ title: 'User deleted' });
-    loadUsers();
+    try {
+      // Delete from user_credits first
+      const { error: creditsError } = await supabase
+        .from('user_credits')
+        .delete()
+        .eq('user_id', userId);
+
+      if (creditsError) {
+        console.error('Error deleting user credits:', creditsError);
+        toast({ title: 'Failed to delete user credits', description: creditsError.message, variant: 'destructive' });
+        setLoading(false);
+        return;
+      }
+
+      // Delete from profiles
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userId);
+
+      if (profileError) {
+        console.error('Error deleting user profile:', profileError);
+        toast({ title: 'Failed to delete user profile', description: profileError.message, variant: 'destructive' });
+        setLoading(false);
+        return;
+      }
+
+      toast({ title: 'User deleted successfully' });
+      await loadUsers();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast({ title: 'Failed to delete user', variant: 'destructive' });
+    }
     setLoading(false);
   };
 
