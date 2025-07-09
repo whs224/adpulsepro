@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface OAuthConfig {
@@ -15,13 +14,16 @@ const getOAuthConfigs = (): Record<string, OAuthConfig> => {
   const currentDomain = window.location.origin;
   console.log('Current domain for OAuth:', currentDomain);
   
+  // Get Google Client ID from environment variable or use placeholder
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID";
+  
   return {
     google_ads: {
-      clientId: "211962165284-laf0vao0gfeqsgtg22josn2n1pq9egg4.apps.googleusercontent.com",
+      clientId: googleClientId,
       redirectUri: `${currentDomain}/oauth/callback`,
       scopes: ['https://www.googleapis.com/auth/adwords'],
       authUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
-      enabled: true
+      enabled: googleClientId !== "YOUR_GOOGLE_CLIENT_ID"
     },
     meta_ads: {
       clientId: "YOUR_META_CLIENT_ID",
@@ -71,6 +73,9 @@ export const initiateOAuth = async (platform: string) => {
   }
 
   if (!config.enabled) {
+    if (platform === 'google_ads') {
+      throw new Error('Google Ads integration requires configuration. Please set up your Google OAuth credentials first.');
+    }
     console.error(`${platform} integration is not enabled yet`);
     throw new Error(`${platform} integration is coming soon!`);
   }

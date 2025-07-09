@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
@@ -127,11 +126,11 @@ async function exchangeGoogleAdsToken(code: string, redirectUri: string) {
   console.log('Exchanging Google Ads token...');
   console.log('Using redirect URI for token exchange:', redirectUri);
   
-  const clientId = "211962165284-laf0vao0gfeqsgtg22josn2n1pq9egg4.apps.googleusercontent.com";
+  const clientId = Deno.env.get('GOOGLE_CLIENT_ID');
   const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET');
   
-  if (!clientSecret) {
-    throw new Error('Google Client Secret not configured');
+  if (!clientId || !clientSecret) {
+    throw new Error('Google OAuth credentials not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in your Supabase secrets.');
   }
 
   const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {

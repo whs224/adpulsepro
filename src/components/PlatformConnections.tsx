@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Plus, Clock, Loader2 } from "lucide-react";
+import { Check, Plus, Clock, Loader2, Settings } from "lucide-react";
 import { isPlatformEnabled, initiateOAuth } from "@/services/oauthService";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -91,10 +91,17 @@ const PlatformConnections = () => {
     const enabled = isPlatformEnabled(platform.key);
     
     if (!enabled) {
-      toast({
-        title: "Coming Soon! 🚀",
-        description: `${platform.name} integration is currently being developed and will be available soon!`,
-      });
+      if (platform.key === 'google_ads') {
+        toast({
+          title: "Configuration Required 🔧",
+          description: "Google Ads integration requires OAuth credentials to be configured. Please set up your Google OAuth client first.",
+        });
+      } else {
+        toast({
+          title: "Coming Soon! 🚀",
+          description: `${platform.name} integration is currently being developed and will be available soon!`,
+        });
+      }
       return;
     }
 
@@ -132,9 +139,12 @@ const PlatformConnections = () => {
             <p className="text-lg text-gray-600">
               Securely connect your advertising accounts to chat with AI about your performance
             </p>
-            <p className="text-sm text-blue-600 mt-2">
-              🚀 All platforms available now! Connect your accounts and start getting AI insights.
-            </p>
+            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <Settings className="inline w-4 h-4 mr-1" />
+                <strong>Setup Required:</strong> Google Ads integration requires OAuth configuration. Please set up your Google OAuth credentials to enable the connection.
+              </p>
+            </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -159,6 +169,11 @@ const PlatformConnections = () => {
                         </Badge>
                       ) : enabled ? (
                         <Badge variant="outline">Available</Badge>
+                      ) : platform.key === 'google_ads' ? (
+                        <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+                          <Settings className="h-3 w-3 mr-1" />
+                          Setup Required
+                        </Badge>
                       ) : (
                         <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
                           <Clock className="h-3 w-3 mr-1" />
@@ -174,10 +189,15 @@ const PlatformConnections = () => {
                         variant={enabled ? "outline" : "ghost"}
                         size="sm"
                         onClick={() => handleConnect(platform)}
-                        disabled={!enabled || platform.comingSoon}
-                        className={!enabled || platform.comingSoon ? "opacity-60" : ""}
+                        disabled={platform.key === 'google_ads' ? !enabled : platform.comingSoon}
+                        className={(!enabled || platform.comingSoon) ? "opacity-60" : ""}
                       >
-                        {platform.comingSoon ? (
+                        {platform.key === 'google_ads' && !enabled ? (
+                          <>
+                            <Settings className="h-4 w-4 mr-2" />
+                            Setup Required
+                          </>
+                        ) : platform.comingSoon ? (
                           <>
                             <Clock className="h-4 w-4 mr-2" />
                             Coming Soon
@@ -204,9 +224,17 @@ const PlatformConnections = () => {
             <p className="text-sm text-gray-500 mb-4">
               🔒 Your data is encrypted and secure. We only access the metrics needed for AI analysis.
             </p>
-            <p className="text-sm text-blue-600">
-              💡 Connect your accounts and start asking AI questions about your ad performance!
-            </p>
+            <div className="p-4 bg-amber-50 rounded-lg">
+              <p className="text-sm text-amber-800 font-medium mb-2">
+                📋 To set up Google Ads integration:
+              </p>
+              <ol className="text-sm text-amber-700 text-left space-y-1">
+                <li>1. Create a Google Cloud project and OAuth 2.0 credentials</li>
+                <li>2. Add your domain to authorized origins and redirect URIs</li>
+                <li>3. Configure the GOOGLE_CLIENT_ID environment variable</li>
+                <li>4. Add the GOOGLE_CLIENT_SECRET to your Supabase secrets</li>
+              </ol>
+            </div>
           </div>
         </div>
       </div>
