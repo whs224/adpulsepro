@@ -15,8 +15,8 @@ const getOAuthConfigs = (): Record<string, OAuthConfig> => {
   const currentDomain = window.location.origin;
   console.log('Current domain for OAuth:', currentDomain);
   
-  // Get Google Client ID from environment variable or use the configured one
-  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "211962165284-t2thud65iqscunist7u0c37gl02ab931.apps.googleusercontent.com";
+  // Get Google Client ID from environment variable - you need to create this in Google Cloud Console
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
   console.log('Google Client ID found:', !!googleClientId);
   
   return {
@@ -44,11 +44,11 @@ const getOAuthConfigs = (): Record<string, OAuthConfig> => {
       description: 'Coming soon'
     },
     linkedin_ads: {
-      clientId: "77sa4cca5uo0vc",
+      clientId: import.meta.env.VITE_LINKEDIN_CLIENT_ID || "",
       redirectUri: `${currentDomain}/oauth/callback`,
       scopes: ['r_ads', 'r_ads_reporting', 'r_organization_social', 'r_liteprofile'],
       authUrl: 'https://www.linkedin.com/oauth/v2/authorization',
-      enabled: false, // Coming soon
+      enabled: !!import.meta.env.VITE_LINKEDIN_CLIENT_ID,
       description: 'Coming soon'
     }
   };
