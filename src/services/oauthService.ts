@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 export interface OAuthConfig {
@@ -16,7 +17,7 @@ const getOAuthConfigs = (): Record<string, OAuthConfig> => {
   
   return {
     google_ads: {
-      clientId: "211962165284-t2thud65iqscunist7u0c37gl02ab931.apps.googleusercontent.com",
+      clientId: "211962165284-laf0vao0gfeqsgtg22josn2n1pq9egg4.apps.googleusercontent.com",
       redirectUri: `${currentDomain}/oauth/callback`,
       scopes: ['https://www.googleapis.com/auth/adwords'],
       authUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
@@ -74,7 +75,7 @@ export const initiateOAuth = async (platform: string) => {
     throw new Error(`${platform} integration is coming soon!`);
   }
 
-  // Generate a more secure state parameter
+  // Generate a more secure state parameter with longer expiry
   const timestamp = Date.now();
   const randomStr = Math.random().toString(36).substring(2, 15);
   const userHash = btoa(user.id).substring(0, 8); // Short hash of user ID
@@ -82,6 +83,25 @@ export const initiateOAuth = async (platform: string) => {
 
   console.log('Generated state for OAuth:', state);
   console.log('OAuth redirect URI:', config.redirectUri);
+
+  // Store state in both localStorage and sessionStorage for redundancy
+  const stateKey = `oauth_state_${platform}`;
+  const stateData = {
+    state,
+    timestamp,
+    platform,
+    userId: user.id,
+    expiresAt: timestamp + (30 * 60 * 1000) // 30 minutes expiry
+  };
+
+  try {
+    localStorage.setItem(stateKey, JSON.stringify(stateData));
+    sessionStorage.setItem(stateKey, JSON.stringify(stateData));
+    console.log(`Stored state in both localStorage and sessionStorage: ${stateKey}`);
+  } catch (error) {
+    console.error('Failed to store OAuth state:', error);
+    throw new Error('Failed to store OAuth state. Please ensure cookies/storage are enabled.');
+  }
 
   const params = new URLSearchParams({
     client_id: config.clientId,
@@ -96,12 +116,47 @@ export const initiateOAuth = async (platform: string) => {
   const authUrl = `${config.authUrl}?${params.toString()}`;
   console.log(`Redirecting to OAuth URL: ${authUrl}`);
   
-  // Store the state for verification when the user returns
-  localStorage.setItem(`oauth_state_${platform}`, state);
-  console.log(`Stored state in localStorage: oauth_state_${platform}`);
-  
   // Use window.location.href for better compatibility
   window.location.href = authUrl;
+};
+
+// Helper function to retrieve and validate OAuth state
+export const getStoredOAuthState = (platform: string) => {
+  const stateKey = `oauth_state_${platform}`;
+  
+  // Try localStorage first, then sessionStorage
+  let stateDataStr = localStorage.getItem(stateKey) || sessionStorage.getItem(stateKey);
+  
+  if (!stateDataStr) {
+    console.error(`No stored state found for platform: ${platform}`);
+    return null;
+  }
+
+  try {
+    const stateData = JSON.parse(stateDataStr);
+    
+    // Check if state has expired
+    if (Date.now() > stateData.expiresAt) {
+      console.error('OAuth state has expired');
+      // Clean up expired state
+      localStorage.removeItem(stateKey);
+      sessionStorage.removeItem(stateKey);
+      return null;
+    }
+
+    return stateData;
+  } catch (error) {
+    console.error('Failed to parse stored OAuth state:', error);
+    return null;
+  }
+};
+
+// Helper function to clean up OAuth state
+export const cleanupOAuthState = (platform: string) => {
+  const stateKey = `oauth_state_${platform}`;
+  localStorage.removeItem(stateKey);
+  sessionStorage.removeItem(stateKey);
+  console.log(`Cleaned up OAuth state for platform: ${platform}`);
 };
 
 export const saveAdAccount = async (

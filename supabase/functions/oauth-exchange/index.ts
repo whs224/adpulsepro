@@ -28,8 +28,11 @@ const handler = async (req: Request): Promise<Response> => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Get the current domain for redirect URI
-    const origin = req.headers.get('origin') || 'https://your-app.lovableproject.com';
+    const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/oauth')[0] || 'https://gkhldfltxvrsnidxbqzp.supabase.co';
     const redirectUri = `${origin}/oauth/callback`;
+    
+    console.log('Using redirect URI:', redirectUri);
+    console.log('Request origin:', origin);
 
     let tokenData;
     let accountInfo;
@@ -55,8 +58,11 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     if (userError || !user) {
+      console.error('User authentication error:', userError);
       throw new Error('User not authenticated');
     }
+
+    console.log('Authenticated user:', user.email);
 
     // Save the ad account
     const { error: saveError } = await supabase
@@ -78,6 +84,8 @@ const handler = async (req: Request): Promise<Response> => {
       console.error('Error saving ad account:', saveError);
       throw saveError;
     }
+
+    console.log('Ad account saved successfully');
 
     return new Response(
       JSON.stringify({ 
@@ -117,6 +125,7 @@ const handler = async (req: Request): Promise<Response> => {
 
 async function exchangeGoogleAdsToken(code: string, redirectUri: string) {
   console.log('Exchanging Google Ads token...');
+  console.log('Using redirect URI for token exchange:', redirectUri);
   
   const clientId = "211962165284-laf0vao0gfeqsgtg22josn2n1pq9egg4.apps.googleusercontent.com";
   const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET');
@@ -191,6 +200,7 @@ async function fetchGoogleAdsAccountInfo(accessToken: string) {
 
 async function exchangeLinkedInToken(code: string, redirectUri: string) {
   console.log('Exchanging LinkedIn token...');
+  console.log('Using redirect URI for LinkedIn token exchange:', redirectUri);
   
   const clientId = "77sa4cca5uo0vc";
   const clientSecret = Deno.env.get('LINKEDIN_CLIENT_SECRET');

@@ -1,8 +1,10 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { getStoredOAuthState, cleanupOAuthState } from "@/services/oauthService";
 
 const OAuthCallback = () => {
   const [searchParams] = useSearchParams();
@@ -50,24 +52,29 @@ const OAuthCallback = () => {
         }
 
         const platform = stateParts[0];
-        const storedState = localStorage.getItem(`oauth_state_${platform}`);
-        
         console.log('Platform extracted:', platform);
-        console.log('Stored state exists:', !!storedState);
-        console.log('State match:', storedState === state);
 
-        if (!storedState) {
+        // Use the improved state retrieval function
+        const storedStateData = getStoredOAuthState(platform);
+        
+        if (!storedStateData) {
           console.error('No stored state found for platform:', platform);
-          throw new Error('No stored state found - possible session timeout');
+          throw new Error('No stored state found - possible session timeout. Please try connecting again.');
         }
 
-        if (storedState !== state) {
+        console.log('Stored state data found:', storedStateData);
+
+        if (storedStateData.state !== state) {
           console.error('State verification failed');
+          console.log('Expected state:', storedStateData.state);
+          console.log('Received state:', state);
           throw new Error('State verification failed - possible security issue');
         }
 
+        console.log('State verification successful');
+
         // Clean up stored state
-        localStorage.removeItem(`oauth_state_${platform}`);
+        cleanupOAuthState(platform);
         
         console.log(`Processing OAuth callback for platform: ${platform} with code: ${code.substring(0, 10)}...`);
         setMessage(`Connecting your ${platform.replace('_', ' ')} account...`);
@@ -165,7 +172,7 @@ const OAuthCallback = () => {
             <p className="text-sm text-gray-500">We'll redirect you back to dashboard to try again.</p>
             <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
               <p className="text-xs text-yellow-800">
-                💡 If this keeps happening, check your browser's developer console for detailed error logs.
+                💡 If this keeps happening, try clearing your browser cache and cookies, or try again in an incognito window.
               </p>
             </div>
           </div>
