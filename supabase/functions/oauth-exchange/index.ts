@@ -129,10 +129,15 @@ async function exchangeGoogleAdsToken(code: string, redirectUri: string) {
   const clientId = Deno.env.get('GOOGLE_CLIENT_ID');
   const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET');
   
+  console.log('Google Client ID available:', !!clientId);
+  console.log('Google Client Secret available:', !!clientSecret);
+  
   if (!clientId || !clientSecret) {
     throw new Error('Google OAuth credentials not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in your Supabase secrets.');
   }
 
+  console.log('Making token exchange request to Google...');
+  
   const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: {
@@ -147,6 +152,8 @@ async function exchangeGoogleAdsToken(code: string, redirectUri: string) {
     }),
   });
 
+  console.log('Token response status:', tokenResponse.status);
+  
   if (!tokenResponse.ok) {
     const errorText = await tokenResponse.text();
     console.error('Google token exchange failed:', errorText);
@@ -155,6 +162,8 @@ async function exchangeGoogleAdsToken(code: string, redirectUri: string) {
 
   const tokens = await tokenResponse.json();
   console.log('Google tokens received successfully');
+  console.log('Access token available:', !!tokens.access_token);
+  console.log('Refresh token available:', !!tokens.refresh_token);
 
   return {
     access_token: tokens.access_token,
