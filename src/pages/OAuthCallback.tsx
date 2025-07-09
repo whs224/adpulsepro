@@ -51,7 +51,9 @@ const OAuthCallback = () => {
           throw new Error('Invalid state parameter format');
         }
 
-        const platform = stateParts[0];
+        // Extract platform correctly - it could be "google_ads", not just "google"
+        const platform = stateParts.length >= 2 && stateParts[1] === 'ads' ? 
+          `${stateParts[0]}_${stateParts[1]}` : stateParts[0];
         console.log('Platform extracted:', platform);
         console.log('Current localStorage keys:', Object.keys(localStorage));
         console.log('Current sessionStorage keys:', Object.keys(sessionStorage));
