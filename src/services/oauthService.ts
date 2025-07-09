@@ -15,8 +15,8 @@ const getOAuthConfigs = (): Record<string, OAuthConfig> => {
   const currentDomain = window.location.origin;
   console.log('Current domain for OAuth:', currentDomain);
   
-  // Get Google Client ID from environment variable
-  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  // Get Google Client ID from environment variable or use the configured one
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "211962165284-t2thud65iqscunist7u0c37gl02ab931.apps.googleusercontent.com";
   console.log('Google Client ID found:', !!googleClientId);
   
   return {
