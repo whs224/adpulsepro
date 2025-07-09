@@ -94,7 +94,8 @@ const PlatformConnections = () => {
       if (platform.key === 'google_ads') {
         toast({
           title: "Configuration Required 🔧",
-          description: "Google Ads integration requires OAuth credentials to be configured. Please set up your Google OAuth client first.",
+          description: "Google Ads integration requires proper OAuth setup. Please contact support to configure your Google OAuth credentials.",
+          variant: "destructive",
         });
       } else {
         toast({
@@ -139,10 +140,10 @@ const PlatformConnections = () => {
             <p className="text-lg text-gray-600">
               Securely connect your advertising accounts to chat with AI about your performance
             </p>
-            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-blue-800">
+            <div className="mt-4 p-4 bg-red-50 rounded-lg border border-red-200">
+              <p className="text-sm text-red-800">
                 <Settings className="inline w-4 h-4 mr-1" />
-                <strong>Setup Required:</strong> Google Ads integration requires OAuth configuration. Please set up your Google OAuth credentials to enable the connection.
+                <strong>Setup Required:</strong> Google Ads integration requires proper OAuth configuration. Please contact support if you encounter "deleted_client" or similar errors.
               </p>
             </div>
           </div>
@@ -170,7 +171,7 @@ const PlatformConnections = () => {
                       ) : enabled ? (
                         <Badge variant="outline">Available</Badge>
                       ) : platform.key === 'google_ads' ? (
-                        <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+                        <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
                           <Settings className="h-3 w-3 mr-1" />
                           Setup Required
                         </Badge>
@@ -195,7 +196,7 @@ const PlatformConnections = () => {
                         {platform.key === 'google_ads' && !enabled ? (
                           <>
                             <Settings className="h-4 w-4 mr-2" />
-                            Setup Required
+                            Contact Support
                           </>
                         ) : platform.comingSoon ? (
                           <>
@@ -224,16 +225,18 @@ const PlatformConnections = () => {
             <p className="text-sm text-gray-500 mb-4">
               🔒 Your data is encrypted and secure. We only access the metrics needed for AI analysis.
             </p>
-            <div className="p-4 bg-amber-50 rounded-lg">
-              <p className="text-sm text-amber-800 font-medium mb-2">
-                📋 To set up Google Ads integration:
+            <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+              <p className="text-sm text-red-800 font-medium mb-2">
+                ⚠️ Important: OAuth Configuration Required
               </p>
-              <ol className="text-sm text-amber-700 text-left space-y-1">
-                <li>1. Create a Google Cloud project and OAuth 2.0 credentials</li>
-                <li>2. Add your domain to authorized origins and redirect URIs</li>
-                <li>3. Configure the GOOGLE_CLIENT_ID environment variable</li>
-                <li>4. Add the GOOGLE_CLIENT_SECRET to your Supabase secrets</li>
-              </ol>
+              <p className="text-sm text-red-700 text-left">
+                If you see "Error 401: deleted_client" or similar errors, it means the Google OAuth credentials need to be properly configured. Please contact support with:
+              </p>
+              <ul className="text-sm text-red-700 text-left mt-2 space-y-1">
+                <li>• Your domain name</li>
+                <li>• Screenshot of the error</li>
+                <li>• Any console error messages</li>
+              </ul>
             </div>
           </div>
         </div>

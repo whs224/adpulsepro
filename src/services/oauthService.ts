@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 export interface OAuthConfig {
@@ -14,16 +15,17 @@ const getOAuthConfigs = (): Record<string, OAuthConfig> => {
   const currentDomain = window.location.origin;
   console.log('Current domain for OAuth:', currentDomain);
   
-  // Get Google Client ID from environment variable or use placeholder
-  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID";
+  // Get Google Client ID from environment variable
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  console.log('Google Client ID found:', !!googleClientId);
   
   return {
     google_ads: {
-      clientId: googleClientId,
+      clientId: googleClientId || "",
       redirectUri: `${currentDomain}/oauth/callback`,
       scopes: ['https://www.googleapis.com/auth/adwords'],
       authUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
-      enabled: googleClientId !== "YOUR_GOOGLE_CLIENT_ID"
+      enabled: !!googleClientId && googleClientId.trim() !== ""
     },
     meta_ads: {
       clientId: "YOUR_META_CLIENT_ID",
@@ -74,10 +76,14 @@ export const initiateOAuth = async (platform: string) => {
 
   if (!config.enabled) {
     if (platform === 'google_ads') {
-      throw new Error('Google Ads integration requires configuration. Please set up your Google OAuth credentials first.');
+      throw new Error('Google Ads integration is not configured. Please contact support to set up your Google OAuth credentials.');
     }
     console.error(`${platform} integration is not enabled yet`);
     throw new Error(`${platform} integration is coming soon!`);
+  }
+
+  if (!config.clientId || config.clientId.trim() === "") {
+    throw new Error('Google OAuth client ID is missing. Please contact support to configure the integration.');
   }
 
   // Generate a more secure state parameter with longer expiry
