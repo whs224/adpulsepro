@@ -108,7 +108,9 @@ export const initiateOAuth = async (platform: string) => {
   try {
     localStorage.setItem(stateKey, JSON.stringify(stateData));
     sessionStorage.setItem(stateKey, JSON.stringify(stateData));
-    console.log(`Stored state in both localStorage and sessionStorage: ${stateKey}`);
+    console.log(`Stored state in both localStorage and sessionStorage: ${stateKey}`, stateData);
+    console.log('Current localStorage keys:', Object.keys(localStorage));
+    console.log('Current sessionStorage keys:', Object.keys(sessionStorage));
   } catch (error) {
     console.error('Failed to store OAuth state:', error);
     throw new Error('Failed to store OAuth state. Please ensure cookies/storage are enabled.');

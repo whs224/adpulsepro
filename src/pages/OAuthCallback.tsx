@@ -53,12 +53,17 @@ const OAuthCallback = () => {
 
         const platform = stateParts[0];
         console.log('Platform extracted:', platform);
+        console.log('Current localStorage keys:', Object.keys(localStorage));
+        console.log('Current sessionStorage keys:', Object.keys(sessionStorage));
 
         // Use the improved state retrieval function
         const storedStateData = getStoredOAuthState(platform);
+        console.log('Retrieved state data:', storedStateData);
         
         if (!storedStateData) {
           console.error('No stored state found for platform:', platform);
+          console.log('All localStorage items:', localStorage);
+          console.log('All sessionStorage items:', sessionStorage);
           throw new Error('No stored state found - possible session timeout. Please try connecting again.');
         }
 
