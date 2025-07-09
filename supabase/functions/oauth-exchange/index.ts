@@ -118,8 +118,12 @@ const handler = async (req: Request): Promise<Response> => {
 async function exchangeGoogleAdsToken(code: string, redirectUri: string) {
   console.log('Exchanging Google Ads token...');
   
-  const clientId = "211962165284-laf0vao0gfeqsgtg22josn2n1pq9egg4.apps.googleusercontent.com";
+  const clientId = Deno.env.get('GOOGLE_CLIENT_ID');
   const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET');
+  
+  if (!clientId) {
+    throw new Error('Google Client ID not configured');
+  }
   
   if (!clientSecret) {
     throw new Error('Google Client Secret not configured');
