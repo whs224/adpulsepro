@@ -18,13 +18,25 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    console.log('=== OAuth Exchange Function Started ===');
     const { platform, code, state }: OAuthExchangeRequest = await req.json();
     console.log(`OAuth exchange for platform: ${platform}`);
+    console.log('Code length:', code?.length || 0);
+    console.log('State:', state);
 
     // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    console.log('Supabase URL available:', !!supabaseUrl);
+    console.log('Supabase service key available:', !!supabaseKey);
+    
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Missing Supabase environment variables');
+    }
+    
     const supabase = createClient(supabaseUrl, supabaseKey);
+    console.log('Supabase client created successfully');
 
     // Get the current domain for redirect URI
     const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/oauth')[0] || 'https://gkhldfltxvrsnidxbqzp.supabase.co';
@@ -36,10 +48,16 @@ const handler = async (req: Request): Promise<Response> => {
     let tokenData;
     let accountInfo;
 
+    console.log('Starting token exchange process...');
+    
     if (platform === 'google_ads') {
+      console.log('Processing Google Ads OAuth...');
       tokenData = await exchangeGoogleAdsToken(code, redirectUri);
+      console.log('Token exchange completed, fetching account info...');
       accountInfo = await fetchGoogleAdsAccountInfo(tokenData.access_token);
+      console.log('Account info fetched successfully');
     } else if (platform === 'linkedin_ads') {
+      console.log('Processing LinkedIn Ads OAuth...');
       tokenData = await exchangeLinkedInToken(code, redirectUri);
       accountInfo = await fetchLinkedInAccountInfo(tokenData.access_token);
     } else {
