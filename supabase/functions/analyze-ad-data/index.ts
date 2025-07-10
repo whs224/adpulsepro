@@ -38,20 +38,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Check if we have connected accounts
     if (!connectedAccounts || connectedAccounts.length === 0) {
-      console.log('No connected accounts found');
-      return new Response(
-        JSON.stringify({
-          response: "I see you haven't connected any ad accounts yet. To get started, please go to the 'Accounts' tab in your dashboard and connect your Google Ads, Meta Ads, or other advertising accounts. Once connected, I'll be able to analyze your campaign performance and provide insights.",
-          context: null
-        }),
-        {
-          status: 200,
-          headers: {
-            "Content-Type": "application/json",
-            ...corsHeaders,
-          },
-        }
-      );
+      console.log('No connected accounts found - providing general advertising advice');
+      return await handleGeneralAdvertisingQuestion(question, openaiApiKey);
     }
 
     // Prepare context about user's data
@@ -76,129 +64,15 @@ const handler = async (req: Request): Promise<Response> => {
     const connectedPlatforms = connectedAccounts.map(acc => acc.platform).join(', ');
     const accountNames = connectedAccounts.map(acc => `${acc.platform} (${acc.account_name})`).join(', ');
 
-    // If no campaign data but we have connected accounts, explain the situation
+    // If no campaign data but we have connected accounts, provide general advice with account context
     if (!campaignData || campaignData.length === 0) {
       console.log('Connected accounts found but no campaign data available');
-      return new Response(
-        JSON.stringify({
-          response: `I can see you have connected accounts: ${accountNames}. However, I don't have any campaign data available yet. This could be because:
-
-1. Your campaigns are very new and data hasn't been synced yet
-2. The connected accounts don't have any active campaigns in the recent period
-3. There was an issue fetching data from the advertising platforms
-
-Try asking me again in a few minutes, or check if your connected accounts have active campaigns with recent data. You can also try reconnecting your accounts if the issue persists.`,
-          context: {
-            connectedAccounts: connectedAccounts.length,
-            platforms: connectedAccounts.map(acc => acc.platform)
-          }
-        }),
-        {
-          status: 200,
-          headers: {
-            "Content-Type": "application/json",
-            ...corsHeaders,
-          },
-        }
-      );
+      return await handleQuestionWithoutData(question, connectedAccounts, userPreferences, openaiApiKey);
     }
 
-    const systemPrompt = `You are an expert digital advertising analyst AI assistant. You help users understand their ad performance data by answering questions about their campaigns across Google Ads, Meta Ads, TikTok Ads, and LinkedIn Ads.
+    // Handle questions with full data context
+    return await handleQuestionWithData(question, campaignData, connectedAccounts, userPreferences, dataContext, openaiApiKey);
 
-Context about this user:
-- Connected accounts: ${accountNames}
-- Available data: ${campaignData.length} campaign records
-${dataContext ? `
-- Platforms with data: ${dataContext.platforms.join(', ')}
-- Total spend: $${dataContext.totalMetrics.spend?.toFixed(2) || '0'}
-- Total impressions: ${dataContext.totalMetrics.impressions?.toLocaleString() || '0'}
-- Total clicks: ${dataContext.totalMetrics.clicks?.toLocaleString() || '0'}
-- Total conversions: ${dataContext.totalMetrics.conversions || '0'}
-` : '- Campaign data is being processed'}
-
-User's KPI Preferences: ${userPreferences?.selected_kpis?.length ? userPreferences.selected_kpis.join(', ') : 'Not specified'}
-Business Goals: ${userPreferences?.business_goals || 'Not specified'}
-Primary Objective: ${userPreferences?.primary_objective || 'Not specified'}
-
-Campaign Data Sample (showing first 3 campaigns):
-${JSON.stringify(campaignData.slice(0, 3), null, 2)}
-${campaignData.length > 3 ? `... and ${campaignData.length - 3} more campaigns` : ''}
-
-Instructions:
-- PRIORITIZE analysis around the user's selected KPIs: ${userPreferences?.selected_kpis?.map(kpi => {
-  const kpiMap: Record<string, string> = {
-    'roas': 'Return on Ad Spend (ROAS) - focus on revenue optimization',
-    'cpa': 'Cost Per Acquisition (CPA) - focus on efficient customer acquisition',
-    'ctr': 'Click-Through Rate (CTR) - focus on ad engagement and relevance',
-    'impressions': 'Impressions & Reach - focus on brand visibility and awareness',
-    'conversions': 'Conversion Rate - focus on conversion optimization',
-    'audience': 'Audience Quality - focus on targeting and audience insights'
-  };
-  return kpiMap[kpi] || kpi;
-}).join('; ') || 'general performance metrics'}
-- When no specific KPIs are selected, provide balanced analysis across all metrics
-- Provide specific, data-driven answers using the actual campaign data
-- Use actual numbers and percentages from their data
-- Compare performance across platforms when relevant
-- Suggest actionable optimizations based on their actual performance AND their KPI priorities
-- Be conversational and helpful, like a knowledgeable marketing consultant
-- Keep responses concise but informative (2-3 paragraphs max unless they ask for details)
-- Always relate insights back to their chosen KPI focus areas when applicable`;
-
-    console.log('Calling OpenAI with system prompt length:', systemPrompt.length);
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openaiApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: systemPrompt
-          },
-          {
-            role: 'user',
-            content: question
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 500
-      })
-    });
-
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('OpenAI API error:', response.status, errorData);
-      throw new Error(`AI service error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const aiResponse = data.choices?.[0]?.message?.content;
-
-    if (!aiResponse) {
-      console.error('No AI response received:', data);
-      throw new Error('No response from AI service');
-    }
-
-    console.log('AI analysis completed successfully, response length:', aiResponse.length);
-
-    return new Response(
-      JSON.stringify({
-        response: aiResponse,
-        context: dataContext
-      }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          ...corsHeaders,
-        },
-      }
-    );
   } catch (error: any) {
     console.error("Error in ad data analysis:", error);
     
@@ -231,6 +105,175 @@ Instructions:
       }
     );
   }
+};
+
+const handleGeneralAdvertisingQuestion = async (question: string, openaiApiKey: string) => {
+  const systemPrompt = `You are an expert digital advertising consultant. The user hasn't connected any ad accounts yet, so provide general advertising advice and best practices.
+
+Focus on:
+- General advertising strategies and best practices
+- Platform-specific advice (Google Ads, Meta Ads, TikTok Ads, LinkedIn Ads)
+- Campaign optimization techniques
+- Budget allocation strategies
+- Audience targeting principles
+- Creative best practices
+- Performance measurement approaches
+
+Be helpful, actionable, and educational. Encourage them to connect their ad accounts to get personalized insights once they have campaigns running.`;
+
+  return await callOpenAI(systemPrompt, question, openaiApiKey, "I see you haven't connected any ad accounts yet. To get started, please go to the 'Accounts' tab in your dashboard and connect your Google Ads, Meta Ads, or other advertising accounts. Once connected, I'll be able to analyze your campaign performance and provide insights.\n\nIn the meantime, I can still help with general advertising questions and best practices!");
+};
+
+const handleQuestionWithoutData = async (question: string, connectedAccounts: any[], userPreferences: any, openaiApiKey: string) => {
+  const accountNames = connectedAccounts.map(acc => `${acc.platform} (${acc.account_name})`).join(', ');
+  
+  const systemPrompt = `You are an expert digital advertising consultant. The user has connected these accounts: ${accountNames}, but no campaign data is available yet.
+
+This could be because:
+1. Their campaigns are very new and data hasn't been synced yet
+2. The connected accounts don't have any active campaigns in the recent period
+3. There was an issue fetching data from the advertising platforms
+
+Provide helpful general advice while acknowledging their connected platforms. Focus on:
+- Platform-specific strategies for their connected accounts
+- Getting started with campaigns on their platforms
+- Best practices for the platforms they use
+- What to expect once their data becomes available
+
+User's preferences: ${userPreferences ? JSON.stringify(userPreferences) : 'None specified'}`;
+
+  const contextualFallback = `I can see you have connected accounts: ${accountNames}. However, I don't have any campaign data available yet. This could be because your campaigns are very new, or there might be an issue syncing data.
+
+I can still help with general advertising advice and strategies for your connected platforms. What would you like to know?`;
+
+  return await callOpenAI(systemPrompt, question, openaiApiKey, contextualFallback);
+};
+
+const handleQuestionWithData = async (question: string, campaignData: any[], connectedAccounts: any[], userPreferences: any, dataContext: any, openaiApiKey: string) => {
+  const accountNames = connectedAccounts.map(acc => `${acc.platform} (${acc.account_name})`).join(', ');
+
+  const systemPrompt = `You are an expert digital advertising analyst AI assistant. You help users understand their ad performance data by answering questions about their campaigns across Google Ads, Meta Ads, TikTok Ads, and LinkedIn Ads.
+
+Context about this user:
+- Connected accounts: ${accountNames}
+- Available data: ${campaignData.length} campaign records
+${dataContext ? `
+- Platforms with data: ${dataContext.platforms.join(', ')}
+- Total spend: $${dataContext.totalMetrics.spend?.toFixed(2) || '0'}
+- Total impressions: ${dataContext.totalMetrics.impressions?.toLocaleString() || '0'}
+- Total clicks: ${dataContext.totalMetrics.clicks?.toLocaleString() || '0'}
+- Total conversions: ${dataContext.totalMetrics.conversions || '0'}
+` : '- Campaign data is being processed'}
+
+User's KPI Preferences: ${userPreferences?.selected_kpis?.length ? userPreferences.selected_kpis.join(', ') : 'Not specified'}
+Business Goals: ${userPreferences?.business_goals || 'Not specified'}
+Primary Objective: ${userPreferences?.primary_objective || 'Not specified'}
+
+Campaign Data Sample (showing first 3 campaigns):
+${JSON.stringify(campaignData.slice(0, 3), null, 2)}
+${campaignData.length > 3 ? `... and ${campaignData.length - 3} more campaigns` : ''}
+
+Instructions:
+- PRIORITIZE analysis around the user's selected KPIs and business goals
+- Provide specific, data-driven answers using the actual campaign data
+- Use actual numbers and percentages from their data
+- Compare performance across platforms when relevant
+- Suggest actionable optimizations based on their actual performance
+- Be conversational and helpful, like a knowledgeable marketing consultant
+- Keep responses concise but informative (2-3 paragraphs max unless they ask for details)`;
+
+  return await callOpenAI(systemPrompt, question, openaiApiKey, null);
+};
+
+const callOpenAI = async (systemPrompt: string, question: string, openaiApiKey: string, fallbackMessage: string | null) => {
+  console.log('Calling OpenAI with system prompt length:', systemPrompt.length);
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${openaiApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: systemPrompt
+        },
+        {
+          role: 'user',
+          content: question
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 500
+    })
+  });
+
+  if (!response.ok) {
+    const errorData = await response.text();
+    console.error('OpenAI API error:', response.status, errorData);
+    
+    if (fallbackMessage) {
+      return new Response(
+        JSON.stringify({
+          response: fallbackMessage,
+          context: null
+        }),
+        {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+            ...corsHeaders,
+          },
+        }
+      );
+    }
+    
+    throw new Error(`AI service error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const aiResponse = data.choices?.[0]?.message?.content;
+
+  if (!aiResponse) {
+    console.error('No AI response received:', data);
+    
+    if (fallbackMessage) {
+      return new Response(
+        JSON.stringify({
+          response: fallbackMessage,
+          context: null
+        }),
+        {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json",
+            ...corsHeaders,
+          },
+        }
+      );
+    }
+    
+    throw new Error('No response from AI service');
+  }
+
+  console.log('AI analysis completed successfully, response length:', aiResponse.length);
+
+  return new Response(
+    JSON.stringify({
+      response: aiResponse,
+      context: null
+    }),
+    {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        ...corsHeaders,
+      },
+    }
+  );
 };
 
 serve(handler);
