@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -55,8 +54,6 @@ const OAuthCallback = () => {
         const platform = stateParts.length >= 2 && stateParts[1] === 'ads' ? 
           `${stateParts[0]}_${stateParts[1]}` : stateParts[0];
         console.log('Platform extracted:', platform);
-        console.log('Current localStorage keys:', Object.keys(localStorage));
-        console.log('Current sessionStorage keys:', Object.keys(sessionStorage));
 
         // Use the improved state retrieval function
         const storedStateData = getStoredOAuthState(platform);
@@ -64,8 +61,6 @@ const OAuthCallback = () => {
         
         if (!storedStateData) {
           console.error('No stored state found for platform:', platform);
-          console.log('All localStorage items:', localStorage);
-          console.log('All sessionStorage items:', sessionStorage);
           throw new Error('No stored state found - possible session timeout. Please try connecting again.');
         }
 
@@ -86,30 +81,38 @@ const OAuthCallback = () => {
         console.log(`Processing OAuth callback for platform: ${platform} with code: ${code.substring(0, 10)}...`);
         setMessage(`Connecting your ${platform.replace('_', ' ')} account...`);
 
-        // Get current user session
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
+        // Get current user session and ensure we have a valid session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError || !session) {
+          console.error('Session error:', sessionError);
           throw new Error('Please sign in to your AdPulse account first');
         }
 
         console.log('User authenticated:', session.user.email);
+        console.log('Session access token available:', !!session.access_token);
 
-        // Exchange code for tokens using our edge function
+        // Exchange code for tokens using our edge function with proper auth header
         const { data, error: exchangeError } = await supabase.functions.invoke('oauth-exchange', {
           body: {
             platform,
             code,
             state
+          },
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
           }
         });
+
+        console.log('Edge function response:', { data, error: exchangeError });
 
         if (exchangeError) {
           console.error('Token exchange failed:', exchangeError);
           throw new Error(exchangeError.message || 'Failed to exchange authorization code');
         }
 
-        if (!data.success) {
-          throw new Error(data.error || 'Failed to connect account');
+        if (!data || !data.success) {
+          console.error('Token exchange returned unsuccessful result:', data);
+          throw new Error(data?.error || 'Failed to connect account');
         }
 
         setStatus('success');

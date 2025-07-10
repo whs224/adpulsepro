@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
@@ -64,19 +65,21 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error(`Unsupported platform: ${platform}`);
     }
 
-    // Get authenticated user
+    // Get authenticated user from the Authorization header
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      throw new Error('No authorization header');
+      console.error('No authorization header found');
+      throw new Error('No authorization header - user not authenticated');
     }
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    );
+    const token = authHeader.replace('Bearer ', '');
+    console.log('Auth token available:', !!token);
+
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
 
     if (userError || !user) {
-      console.error('User authentication error:', userError);
-      throw new Error('User not authenticated');
+      console.error('User authentication error:', userError?.message || 'Unknown error');
+      throw new Error(`User authentication failed: ${userError?.message || 'Unknown error'}`);
     }
 
     console.log('Authenticated user:', user.email);
@@ -98,8 +101,8 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
     if (saveError) {
-      console.error('Error saving ad account:', saveError);
-      throw saveError;
+      console.error('Error saving ad account:', saveError.message);
+      throw new Error(`Failed to save account: ${saveError.message}`);
     }
 
     console.log('Ad account saved successfully');
@@ -124,10 +127,12 @@ const handler = async (req: Request): Promise<Response> => {
 
   } catch (error: any) {
     console.error("OAuth exchange error:", error);
+    console.error("Error stack:", error.stack);
+    
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message,
+        error: error.message || 'Unknown error occurred',
       }),
       {
         status: 500,
@@ -144,14 +149,16 @@ async function exchangeGoogleAdsToken(code: string, redirectUri: string) {
   console.log('Exchanging Google Ads token...');
   console.log('Using redirect URI for token exchange:', redirectUri);
   
-  const clientId = Deno.env.get('GOOGLE_CLIENT_ID');
+  // Use the correct client ID that matches what was used in the OAuth flow
+  const clientId = '211962165284-t2thud65iqscunist7u0c37gl02ab931.apps.googleusercontent.com';
   const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET');
   
-  console.log('Google Client ID available:', !!clientId);
+  console.log('Google Client ID:', clientId);
   console.log('Google Client Secret available:', !!clientSecret);
   
-  if (!clientId || !clientSecret) {
-    throw new Error('Google OAuth credentials not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in your Supabase secrets.');
+  if (!clientSecret) {
+    console.error('Google Client Secret not found in environment');
+    throw new Error('Google OAuth credentials not configured. Google Client Secret is missing.');
   }
 
   console.log('Making token exchange request to Google...');
@@ -175,7 +182,7 @@ async function exchangeGoogleAdsToken(code: string, redirectUri: string) {
   if (!tokenResponse.ok) {
     const errorText = await tokenResponse.text();
     console.error('Google token exchange failed:', errorText);
-    throw new Error(`Failed to exchange Google token: ${errorText}`);
+    throw new Error(`Failed to exchange Google token (${tokenResponse.status}): ${errorText}`);
   }
 
   const tokens = await tokenResponse.json();
@@ -205,44 +212,53 @@ async function fetchGoogleAdsAccountInfo(accessToken: string) {
     };
   }
 
-  // Get user's accessible customers
-  const customersResponse = await fetch('https://googleads.googleapis.com/v17/customers:listAccessibleCustomers', {
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'developer-token': developerToken,
-    },
-  });
+  try {
+    // Get user's accessible customers
+    const customersResponse = await fetch('https://googleads.googleapis.com/v17/customers:listAccessibleCustomers', {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'developer-token': developerToken,
+      },
+    });
 
-  if (!customersResponse.ok) {
-    const errorText = await customersResponse.text();
-    console.error('Failed to fetch Google Ads customers:', errorText);
-    console.log('Falling back to basic account info');
-    // Fallback to basic info if API call fails
+    if (!customersResponse.ok) {
+      const errorText = await customersResponse.text();
+      console.error('Failed to fetch Google Ads customers:', errorText);
+      console.log('Falling back to basic account info');
+      // Fallback to basic info if API call fails
+      return {
+        id: 'google_ads_account_' + Date.now(),
+        name: 'Google Ads Account (Connected via OAuth)'
+      };
+    }
+
+    const customers = await customersResponse.json();
+    console.log('Google Ads customers fetched:', customers);
+
+    // Use the first customer or implement customer selection logic
+    const firstCustomer = customers.resourceNames?.[0];
+    if (!firstCustomer) {
+      console.log('No Google Ads accounts found in API response, using fallback');
+      return {
+        id: 'google_ads_account_' + Date.now(),
+        name: 'Google Ads Account (Connected via OAuth)'
+      };
+    }
+
+    const customerId = firstCustomer.split('/')[1];
+    
+    return {
+      id: customerId,
+      name: `Google Ads Account (${customerId})`
+    };
+  } catch (error) {
+    console.error('Error fetching Google Ads account info:', error);
+    console.log('Using fallback account info due to error');
     return {
       id: 'google_ads_account_' + Date.now(),
       name: 'Google Ads Account (Connected via OAuth)'
     };
   }
-
-  const customers = await customersResponse.json();
-  console.log('Google Ads customers fetched:', customers);
-
-  // Use the first customer or implement customer selection logic
-  const firstCustomer = customers.resourceNames?.[0];
-  if (!firstCustomer) {
-    console.log('No Google Ads accounts found in API response, using fallback');
-    return {
-      id: 'google_ads_account_' + Date.now(),
-      name: 'Google Ads Account (Connected via OAuth)'
-    };
-  }
-
-  const customerId = firstCustomer.split('/')[1];
-  
-  return {
-    id: customerId,
-    name: `Google Ads Account (${customerId})`
-  };
 }
 
 async function exchangeLinkedInToken(code: string, redirectUri: string) {
