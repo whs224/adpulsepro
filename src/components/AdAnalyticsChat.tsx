@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,12 +21,14 @@ const AdAnalyticsChat = () => {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [remainingCredits, setRemainingCredits] = useState<number | null>(null);
+  const [debugInfo, setDebugInfo] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
 
   useEffect(() => {
     if (user) {
       loadCredits();
+      checkConnectedAccounts();
       // Add welcome message
       setMessages([{
         id: '1',
@@ -39,6 +42,21 @@ const AdAnalyticsChat = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const checkConnectedAccounts = async () => {
+    try {
+      const { data: accounts, error } = await supabase
+        .from('ad_accounts')
+        .select('platform, account_name, is_active')
+        .eq('user_id', user?.id)
+        .eq('is_active', true);
+
+      console.log('Connected accounts check:', accounts);
+      setDebugInfo({ connectedAccounts: accounts || [] });
+    } catch (error) {
+      console.error('Error checking connected accounts:', error);
+    }
+  };
 
   const loadCredits = async () => {
     try {
@@ -85,16 +103,53 @@ const AdAnalyticsChat = () => {
       // Update remaining credits
       await loadCredits();
 
+      console.log('Fetching user data for AI analysis...');
+
       // Get user's campaign data, connected accounts, and preferences
       const [campaignResponse, accountsResponse, preferencesResponse] = await Promise.all([
-        supabase.from('campaign_data').select('*').eq('user_id', user.id),
-        supabase.from('ad_accounts').select('platform, account_name').eq('user_id', user.id).eq('is_active', true),
-        supabase.from('user_preferences').select('*').eq('user_id', user.id).single()
+        supabase.from('campaign_data')
+          .select(`
+            *,
+            ad_accounts!inner(platform, account_name)
+          `)
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(100), // Limit to recent data for better performance
+        supabase.from('ad_accounts')
+          .select('platform, account_name, is_active')
+          .eq('user_id', user.id)
+          .eq('is_active', true),
+        supabase.from('user_preferences')
+          .select('*')
+          .eq('user_id', user.id)
+          .single()
       ]);
+
+      console.log('Data fetched:', {
+        campaigns: campaignResponse.data?.length || 0,
+        accounts: accountsResponse.data?.length || 0,
+        preferences: !!preferencesResponse.data
+      });
+
+      if (campaignResponse.error && campaignResponse.error.code !== 'PGRST116') {
+        console.error('Campaign data error:', campaignResponse.error);
+      }
+      if (accountsResponse.error) {
+        console.error('Accounts data error:', accountsResponse.error);
+      }
+      if (preferencesResponse.error && preferencesResponse.error.code !== 'PGRST116') {
+        console.error('Preferences data error:', preferencesResponse.error);
+      }
 
       const campaignData = campaignResponse.data || [];
       const connectedAccounts = accountsResponse.data || [];
       const userPreferences = preferencesResponse.data || null;
+
+      console.log('Calling analyze-ad-data function with:', {
+        campaignCount: campaignData.length,
+        accountCount: connectedAccounts.length,
+        hasPreferences: !!userPreferences
+      });
 
       // Call the analyze-ad-data edge function
       const { data, error } = await supabase.functions.invoke('analyze-ad-data', {
@@ -110,26 +165,28 @@ const AdAnalyticsChat = () => {
         }
       });
 
+      console.log('AI function response:', { data, error });
+
       if (error) {
         console.error('Error calling AI function:', error);
-        throw error;
+        throw new Error(error.message || 'Failed to get AI response');
       }
 
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'ai',
-        content: data.response || "I'm having trouble analyzing your data right now. Please try again in a moment.",
+        content: data?.response || "I apologize, but I'm having trouble processing your request right now. Please try again in a moment.",
         timestamp: new Date()
       };
 
       setMessages(prev => [...prev, aiMessage]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending message:', error);
       
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'ai',
-        content: "I'm experiencing technical difficulties. Please make sure your ad accounts are connected and try again.",
+        content: `I encountered an error: ${error.message || 'Unknown error'}. Please try again, and if the issue persists, make sure your ad accounts are properly connected.`,
         timestamp: new Date()
       };
 
@@ -168,6 +225,11 @@ const AdAnalyticsChat = () => {
           </CardTitle>
           <CardDescription className="text-blue-100 mt-1">
             Ask questions about your ad performance. Each message uses 1 credit.
+            {debugInfo?.connectedAccounts?.length > 0 && (
+              <span className="block mt-1 text-blue-200">
+                Connected: {debugInfo.connectedAccounts.map((acc: any) => acc.platform).join(', ')}
+              </span>
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex-1 p-4 overflow-hidden flex flex-col bg-white/80 rounded-b-2xl">
