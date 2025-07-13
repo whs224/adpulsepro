@@ -3,7 +3,7 @@ import { useState, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MessageCircle, Settings, BarChart3 } from "lucide-react";
-import PlatformConnections from "@/components/PlatformConnections";
+import ConnectedAccountsList from "@/components/ConnectedAccountsList";
 import AdAnalyticsChat from "@/components/AdAnalyticsChat";
 import AdDataDashboard from "@/components/AdDataDashboard";
 import CreditDisplay from "@/components/CreditDisplay";
@@ -99,7 +99,7 @@ const Dashboard = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <PlatformConnections />
+                <ConnectedAccountsList />
               </CardContent>
             </Card>
           </TabsContent>

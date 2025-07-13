@@ -217,22 +217,30 @@ const AdAnalyticsChat = () => {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <Card className="h-[600px] flex flex-col shadow-lg rounded-2xl bg-gradient-to-br from-white to-blue-50 border border-blue-100">
-        <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-t-2xl p-4">
-          <CardTitle className="text-white text-xl flex items-center gap-2">
-            <Bot className="h-5 w-5" />
+      <Card className="h-[600px] flex flex-col shadow-xl rounded-3xl bg-gradient-to-br from-slate-50 to-white border-0">
+        <CardHeader className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-t-3xl p-6">
+          <CardTitle className="text-white text-2xl flex items-center gap-3 font-semibold">
+            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+              <Bot className="h-6 w-6" />
+            </div>
             AdPulse AI Assistant
           </CardTitle>
-          <CardDescription className="text-blue-100 mt-1">
-            Ask questions about your ad performance. Each message uses 1 credit.
+          <CardDescription className="text-blue-100 mt-2 text-sm">
+            Ask me anything about advertising strategies. Each message uses 1 credit.
             {debugInfo?.connectedAccounts?.length > 0 && (
-              <span className="block mt-1 text-blue-200">
-                Connected: {debugInfo.connectedAccounts.map((acc: any) => acc.platform).join(', ')}
+              <span className="block mt-1 text-blue-200 flex items-center gap-1">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                Connected: {debugInfo.connectedAccounts.map((acc: any) => 
+                  acc.platform === 'google_ads' ? 'Google Ads' :
+                  acc.platform === 'meta_ads' ? 'Meta Ads' :
+                  acc.platform === 'tiktok_ads' ? 'TikTok Ads' :
+                  acc.platform === 'linkedin_ads' ? 'LinkedIn Ads' : acc.platform
+                ).join(', ')}
               </span>
             )}
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex-1 p-4 overflow-hidden flex flex-col bg-white/80 rounded-b-2xl">
+        <CardContent className="flex-1 p-6 overflow-hidden flex flex-col bg-white/90 backdrop-blur-sm rounded-b-3xl">
           <div className="flex-1 overflow-y-auto space-y-4 mb-4">
             {messages.map((message) => (
               <div
@@ -241,26 +249,28 @@ const AdAnalyticsChat = () => {
                   message.type === 'user' ? 'flex-row-reverse space-x-reverse' : ''
                 }`}
               >
-                <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                  message.type === 'user' ? 'bg-blue-500' : 'bg-purple-500'
+                <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center shadow-sm ${
+                  message.type === 'user' 
+                    ? 'bg-gradient-to-r from-blue-500 to-blue-600' 
+                    : 'bg-gradient-to-r from-purple-500 to-indigo-600'
                 }`}>
                   {message.type === 'user' ? (
-                    <User className="h-4 w-4 text-white" />
+                    <User className="h-5 w-5 text-white" />
                   ) : (
-                    <Bot className="h-4 w-4 text-white" />
+                    <Bot className="h-5 w-5 text-white" />
                   )}
                 </div>
                 <div className={`flex-1 max-w-[80%] ${
                   message.type === 'user' ? 'text-right' : ''
                 }`}>
-                  <div className={`rounded-lg p-3 ${
+                  <div className={`rounded-2xl p-4 shadow-sm ${
                     message.type === 'user'
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-100 text-gray-900'
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
+                      : 'bg-white text-gray-800 border border-gray-100'
                   }`}>
                     <p className="whitespace-pre-wrap">{message.content}</p>
                   </div>
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="text-xs text-gray-500 mt-2 opacity-70">
                     {message.timestamp.toLocaleTimeString()}
                   </p>
                 </div>
@@ -268,14 +278,14 @@ const AdAnalyticsChat = () => {
             ))}
             {isLoading && (
               <div className="flex items-start space-x-3">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center">
-                  <Bot className="h-4 w-4 text-white" />
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-indigo-600 flex items-center justify-center shadow-sm">
+                  <Bot className="h-5 w-5 text-white" />
                 </div>
-                <div className="bg-gray-100 rounded-lg p-3">
+                <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
                   <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                   </div>
                 </div>
               </div>
@@ -287,17 +297,17 @@ const AdAnalyticsChat = () => {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Ask about your ad performance..."
+              placeholder="Ask me anything about advertising strategies..."
               disabled={isLoading || (remainingCredits !== null && remainingCredits <= 0)}
-              className="flex-1 rounded-lg border border-blue-200 focus:ring-2 focus:ring-blue-400"
+              className="flex-1 rounded-xl border-2 border-gray-200 focus:border-blue-400 focus:ring-0 px-4 py-3 bg-white shadow-sm"
             />
             <Button
               onClick={handleSendMessage}
               disabled={!inputValue.trim() || isLoading || (remainingCredits !== null && remainingCredits <= 0)}
               size="icon"
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 rounded-lg shadow"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 rounded-xl shadow-md p-3 h-12 w-12"
             >
-              <Send className="h-4 w-4" />
+              <Send className="h-5 w-5" />
             </Button>
           </div>
           {remainingCredits !== null && (

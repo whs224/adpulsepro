@@ -125,26 +125,74 @@ Be helpful, actionable, and educational. Encourage them to connect their ad acco
 };
 
 const handleQuestionWithoutData = async (question: string, connectedAccounts: any[], userPreferences: any, openaiApiKey: string) => {
-  const accountNames = connectedAccounts.map(acc => `${acc.platform} (${acc.account_name})`).join(', ');
+  // Use Perplexity AI for web search to answer questions
+  const perplexityApiKey = Deno.env.get('PERPLEXITY_API_KEY');
   
-  const systemPrompt = `You are an expert digital advertising consultant. The user has connected these accounts: ${accountNames}, but no campaign data is available yet.
+  // Format platform names nicely
+  const platformNames = connectedAccounts.map(acc => 
+    acc.platform === 'google_ads' ? 'Google Ads' :
+    acc.platform === 'meta_ads' ? 'Meta/Facebook Ads' :
+    acc.platform === 'tiktok_ads' ? 'TikTok Ads' :
+    acc.platform === 'linkedin_ads' ? 'LinkedIn Ads' : acc.platform
+  ).join(', ');
+  
+  if (perplexityApiKey) {
+    console.log('Using Perplexity AI to search for advertising advice');
+    
+    try {
+      const searchResponse = await fetch('https://api.perplexity.ai/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${perplexityApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'llama-3.1-sonar-small-128k-online',
+          messages: [
+            {
+              role: 'system',
+              content: `You are an expert digital marketing and advertising consultant. Provide actionable, specific advice for advertising campaigns. Be concise but thorough. The user has connected these platforms: ${platformNames}. Always be helpful and provide real-world strategies.`
+            },
+            {
+              role: 'user',
+              content: question
+            }
+          ],
+          temperature: 0.2,
+          top_p: 0.9,
+          max_tokens: 1000,
+          return_images: false,
+          return_related_questions: false,
+          search_recency_filter: 'month',
+          frequency_penalty: 1,
+          presence_penalty: 0
+        }),
+      });
 
-This could be because:
-1. Their campaigns are very new and data hasn't been synced yet
-2. The connected accounts don't have any active campaigns in the recent period
-3. There was an issue fetching data from the advertising platforms
+      if (searchResponse.ok) {
+        const searchData = await searchResponse.json();
+        const aiResponse = searchData.choices?.[0]?.message?.content;
+        
+        if (aiResponse) {
+          const responseText = `Great question! I can see you have ${platformNames} connected. Here's what I found:\n\n${aiResponse}`;
+          
+          return new Response(
+            JSON.stringify({ response: responseText }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Perplexity API error:', error);
+    }
+  }
 
-Provide helpful general advice while acknowledging their connected platforms. Focus on:
-- Platform-specific strategies for their connected accounts
-- Getting started with campaigns on their platforms
-- Best practices for the platforms they use
-- What to expect once their data becomes available
+  // Fallback to OpenAI if Perplexity is not available
+  const systemPrompt = `You are an expert digital advertising consultant. The user has connected ${platformNames}, but no campaign data is available yet. Provide helpful general advice while acknowledging their connected platforms. Be actionable and specific.`;
 
-User's preferences: ${userPreferences ? JSON.stringify(userPreferences) : 'None specified'}`;
+  const contextualFallback = `I can see you have ${platformNames} connected! While I don't have campaign data available yet, I can help with general advertising strategies. However, for the most current and detailed advice, please ensure the Perplexity API key is configured to enable web search capabilities.
 
-  const contextualFallback = `I can see you have connected accounts: ${accountNames}. However, I don't have any campaign data available yet. This could be because your campaigns are very new, or there might be an issue syncing data.
-
-I can still help with general advertising advice and strategies for your connected platforms. What would you like to know?`;
+What specific aspects of your advertising would you like guidance on?`;
 
   return await callOpenAI(systemPrompt, question, openaiApiKey, contextualFallback);
 };
