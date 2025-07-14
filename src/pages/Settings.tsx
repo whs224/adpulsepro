@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import AdAccountConnector from "@/components/AdAccountConnector";
+import ConnectedAccountsList from "@/components/ConnectedAccountsList";
 
 const Settings = () => {
   const { user } = useAuth();
@@ -280,8 +280,16 @@ const Settings = () => {
                 </CardContent>
               </Card>
 
-              {/* Connected Accounts - Use new component */}
-              <AdAccountConnector />
+              {/* Connected Accounts */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Connected Accounts</CardTitle>
+                  <p className="text-sm text-gray-600">Connect your advertising accounts to start getting insights</p>
+                </CardHeader>
+                <CardContent>
+                  <ConnectedAccountsList />
+                </CardContent>
+              </Card>
 
               {/* KPI Preferences */}
               <Card>
