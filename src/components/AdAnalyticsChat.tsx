@@ -113,7 +113,7 @@ const AdAnalyticsChat = () => {
             ad_accounts!inner(platform, account_name)
           `)
           .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
+          .order('fetched_at', { ascending: false })
           .limit(100), // Limit to recent data for better performance
         supabase.from('ad_accounts')
           .select('platform, account_name, is_active')
