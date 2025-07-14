@@ -409,34 +409,38 @@ const AdAnalyticsChat = () => {
                       <Bot className="h-5 w-5 text-white" />
                     )}
                   </div>
-                  <div className={`flex-1 max-w-[85%] ${
-                    message.type === 'user' ? 'text-right' : ''
+                  <div className={`${
+                    message.type === 'user' ? 'flex justify-end' : 'flex justify-start'
                   }`}>
-                    <div className={`rounded-2xl p-4 shadow-lg ${
-                      message.type === 'user'
-                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
-                        : 'bg-white text-gray-800 border border-gray-100'
-                    }`}>
-                      <div className="prose prose-sm max-w-none">
-                        {message.content.split('\n').map((line, index) => {
-                          if (line.startsWith('###')) {
-                            return <h3 key={index} className={`text-lg font-semibold mt-3 mb-2 ${message.type === 'user' ? 'text-white' : 'text-gray-900'}`}>{line.replace('###', '').trim()}</h3>;
-                          } else if (line.startsWith('##')) {
-                            return <h2 key={index} className={`text-xl font-bold mt-4 mb-2 ${message.type === 'user' ? 'text-white' : 'text-gray-900'}`}>{line.replace('##', '').trim()}</h2>;
-                          } else if (line.startsWith('- ')) {
-                            return <li key={index} className={`ml-4 list-disc ${message.type === 'user' ? 'text-blue-100' : 'text-gray-700'}`}>{line.replace('- ', '')}</li>;
-                          } else if (line.startsWith('**') && line.endsWith('**')) {
-                            return <p key={index} className={`font-semibold ${message.type === 'user' ? 'text-white' : 'text-gray-900'}`}>{line.replace(/\*\*/g, '')}</p>;
-                          } else if (line.trim()) {
-                            return <p key={index} className={`mb-2 leading-relaxed ${message.type === 'user' ? 'text-white' : 'text-gray-800'}`}>{line}</p>;
-                          }
-                          return <br key={index} />;
-                        })}
+                    <div className="flex flex-col">
+                      <div className={`inline-block max-w-[85%] rounded-2xl p-4 shadow-lg ${
+                        message.type === 'user'
+                          ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
+                          : 'bg-white text-gray-800 border border-gray-100'
+                      }`}>
+                        <div className="prose prose-sm max-w-none">
+                          {message.content.split('\n').map((line, index) => {
+                            if (line.startsWith('###')) {
+                              return <h3 key={index} className={`text-lg font-semibold mt-3 mb-2 ${message.type === 'user' ? 'text-white' : 'text-gray-900'}`}>{line.replace('###', '').trim()}</h3>;
+                            } else if (line.startsWith('##')) {
+                              return <h2 key={index} className={`text-xl font-bold mt-4 mb-2 ${message.type === 'user' ? 'text-white' : 'text-gray-900'}`}>{line.replace('##', '').trim()}</h2>;
+                            } else if (line.startsWith('- ')) {
+                              return <li key={index} className={`ml-4 list-disc ${message.type === 'user' ? 'text-blue-100' : 'text-gray-700'}`}>{line.replace('- ', '')}</li>;
+                            } else if (line.startsWith('**') && line.endsWith('**')) {
+                              return <p key={index} className={`font-semibold ${message.type === 'user' ? 'text-white' : 'text-gray-900'}`}>{line.replace(/\*\*/g, '')}</p>;
+                            } else if (line.trim()) {
+                              return <p key={index} className={`mb-2 leading-relaxed ${message.type === 'user' ? 'text-white' : 'text-gray-800'}`}>{line}</p>;
+                            }
+                            return <br key={index} />;
+                          })}
+                        </div>
                       </div>
+                      <p className={`text-xs text-gray-500 mt-2 opacity-70 ${
+                        message.type === 'user' ? 'text-right' : 'text-left'
+                      }`}>
+                        {message.timestamp.toLocaleTimeString()}
+                      </p>
                     </div>
-                    <p className="text-xs text-gray-500 mt-2 opacity-70">
-                      {message.timestamp.toLocaleTimeString()}
-                    </p>
                   </div>
                 </div>
               ))}

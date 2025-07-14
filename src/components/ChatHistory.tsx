@@ -120,11 +120,9 @@ const ChatHistory = ({ currentSessionId, onSessionSelect, onNewChat, onSessionUp
     }
   };
 
-  // Refresh sessions when called from parent
+  // Refresh sessions when parent requests update
   useEffect(() => {
-    if (onSessionUpdate) {
-      loadChatSessions();
-    }
+    loadChatSessions();
   }, [onSessionUpdate]);
 
   return (
