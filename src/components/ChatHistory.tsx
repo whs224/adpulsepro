@@ -26,7 +26,7 @@ interface ChatHistoryProps {
   currentSessionId: string | null;
   onSessionSelect: (sessionId: string) => void;
   onNewChat: () => void;
-  onSessionUpdate?: () => void;
+  onSessionUpdate?: number;
 }
 
 const ChatHistory = ({ currentSessionId, onSessionSelect, onNewChat, onSessionUpdate }: ChatHistoryProps) => {
@@ -97,7 +97,7 @@ const ChatHistory = ({ currentSessionId, onSessionSelect, onNewChat, onSessionUp
       }
       
       toast.success('Chat deleted');
-      onSessionUpdate?.();
+      // Session deleted, no need to trigger update
     } catch (error: any) {
       console.error('Error deleting session:', error);
       toast.error('Failed to delete chat');
@@ -120,15 +120,11 @@ const ChatHistory = ({ currentSessionId, onSessionSelect, onNewChat, onSessionUp
     }
   };
 
-  // Refresh sessions when parent requests update with debouncing to prevent flickering
+  // Only refresh sessions when explicitly requested, not on every render
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (onSessionUpdate) {
-        loadChatSessions();
-      }
-    }, 200);
-
-    return () => clearTimeout(timeoutId);
+    if (onSessionUpdate && onSessionUpdate > 0) {
+      loadChatSessions();
+    }
   }, [onSessionUpdate]);
 
   return (

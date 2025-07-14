@@ -1,11 +1,13 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Plus, Clock, Loader2, Settings } from "lucide-react";
+import { Check, Plus, Clock, Loader2 } from "lucide-react";
 import { isPlatformEnabled, initiateOAuth } from "@/services/oauthService";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 // Company logo components
 const GoogleAdsLogo = () => (
@@ -86,23 +88,41 @@ const PlatformConnections = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [connectedAccounts, setConnectedAccounts] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user?.id) {
+      loadConnectedAccounts();
+    }
+  }, [user?.id]);
+
+  const loadConnectedAccounts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('ad_accounts')
+        .select('platform')
+        .eq('user_id', user?.id)
+        .eq('is_active', true);
+
+      if (error) throw error;
+      
+      setConnectedAccounts(data?.map(account => account.platform) || []);
+    } catch (error) {
+      console.error('Error loading connected accounts:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleConnect = (platform: { key: string; name: string }) => {
     const enabled = isPlatformEnabled(platform.key);
     
     if (!enabled) {
-      if (platform.key === 'google_ads') {
-        toast({
-          title: "Configuration Required 🔧",
-          description: "Google Ads integration requires proper OAuth setup. Please contact support to configure your Google OAuth credentials.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Coming Soon! 🚀",
-          description: `${platform.name} integration is currently being developed and will be available soon!`,
-        });
-      }
+      toast({
+        title: "Coming Soon! 🚀",
+        description: `${platform.name} integration is currently being developed and will be available soon!`,
+      });
       return;
     }
 
@@ -129,6 +149,19 @@ const PlatformConnections = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p>Loading platform connections...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-20 bg-gray-50">
       <div className="container mx-auto px-4">
@@ -140,17 +173,12 @@ const PlatformConnections = () => {
             <p className="text-lg text-gray-600">
               Securely connect your advertising accounts to chat with AI about your performance
             </p>
-            <div className="mt-4 p-4 bg-red-50 rounded-lg border border-red-200">
-              <p className="text-sm text-red-800">
-                <Settings className="inline w-4 h-4 mr-1" />
-                <strong>Setup Required:</strong> Google Ads integration requires proper OAuth configuration. Please contact support if you encounter "deleted_client" or similar errors.
-              </p>
-            </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {platforms.map((platform) => {
               const enabled = isPlatformEnabled(platform.key);
+              const isConnected = connectedAccounts.includes(platform.key);
               
               return (
                 <Card key={platform.name} className="hover:shadow-lg transition-shadow duration-300">
@@ -160,21 +188,18 @@ const PlatformConnections = () => {
                         <platform.logo />
                         <div>
                           <CardTitle className="text-lg">{platform.name}</CardTitle>
-                          <CardDescription>{platform.description}</CardDescription>
+                          <CardDescription>
+                            {platform.key === 'google_ads' ? 'Search, Display & YouTube advertising' : platform.description}
+                          </CardDescription>
                         </div>
                       </div>
-                      {platform.connected ? (
+                      {isConnected ? (
                         <Badge variant="secondary" className="bg-green-100 text-green-800">
                           <Check className="h-3 w-3 mr-1" />
                           Connected
                         </Badge>
                       ) : enabled ? (
                         <Badge variant="outline">Available</Badge>
-                      ) : platform.key === 'google_ads' ? (
-                        <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-                          <Settings className="h-3 w-3 mr-1" />
-                          Setup Required
-                        </Badge>
                       ) : (
                         <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
                           <Clock className="h-3 w-3 mr-1" />
@@ -185,20 +210,15 @@ const PlatformConnections = () => {
                   </CardHeader>
                   
                   <CardContent>
-                    {!platform.connected ? (
+                    {!isConnected ? (
                       <Button 
                         variant={enabled ? "outline" : "ghost"}
                         size="sm"
                         onClick={() => handleConnect(platform)}
-                        disabled={platform.key === 'google_ads' ? !enabled : platform.comingSoon}
-                        className={(!enabled || platform.comingSoon) ? "opacity-60" : ""}
+                        disabled={!enabled}
+                        className={!enabled ? "opacity-60" : ""}
                       >
-                        {platform.key === 'google_ads' && !enabled ? (
-                          <>
-                            <Settings className="h-4 w-4 mr-2" />
-                            Contact Support
-                          </>
-                        ) : platform.comingSoon ? (
+                        {!enabled ? (
                           <>
                             <Clock className="h-4 w-4 mr-2" />
                             Coming Soon
@@ -222,22 +242,9 @@ const PlatformConnections = () => {
           </div>
           
           <div className="text-center mt-8">
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-sm text-gray-500">
               🔒 Your data is encrypted and secure. We only access the metrics needed for AI analysis.
             </p>
-            <div className="p-4 bg-red-50 rounded-lg border border-red-200">
-              <p className="text-sm text-red-800 font-medium mb-2">
-                ⚠️ Important: OAuth Configuration Required
-              </p>
-              <p className="text-sm text-red-700 text-left">
-                If you see "Error 401: deleted_client" or similar errors, it means the Google OAuth credentials need to be properly configured. Please contact support with:
-              </p>
-              <ul className="text-sm text-red-700 text-left mt-2 space-y-1">
-                <li>• Your domain name</li>
-                <li>• Screenshot of the error</li>
-                <li>• Any console error messages</li>
-              </ul>
-            </div>
           </div>
         </div>
       </div>

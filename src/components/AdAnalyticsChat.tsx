@@ -389,7 +389,7 @@ const AdAnalyticsChat = () => {
           currentSessionId={currentSessionId}
           onSessionSelect={handleSessionSelect}
           onNewChat={handleNewChat}
-          onSessionUpdate={() => setSessionUpdate(prev => prev + 1)}
+          onSessionUpdate={sessionUpdate}
         />
       </div>
 
