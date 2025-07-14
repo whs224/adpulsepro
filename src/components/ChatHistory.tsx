@@ -127,7 +127,7 @@ const ChatHistory = ({ currentSessionId, onSessionSelect, onNewChat, onSessionUp
 
   return (
     <Card className="h-full flex flex-col border-r border-gray-200 rounded-l-3xl rounded-r-none">
-      <CardHeader className="pb-4">
+      <CardHeader className="pb-4 flex-shrink-0">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
             <MessageSquare className="h-5 w-5" />
@@ -143,8 +143,8 @@ const ChatHistory = ({ currentSessionId, onSessionSelect, onNewChat, onSessionUp
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 p-0">
-        <ScrollArea className="h-full px-4">
+      <CardContent className="flex-1 p-0 overflow-hidden">{/* Added overflow-hidden */}
+        <ScrollArea className="h-full max-h-[calc(100vh-200px)] px-4">{/* Added max-height constraint */}
           {loading ? (
             <div className="space-y-3">
               {[...Array(5)].map((_, i) => (

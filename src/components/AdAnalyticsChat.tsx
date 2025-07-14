@@ -28,10 +28,11 @@ const AdAnalyticsChat = () => {
   const { user } = useAuth();
 
   useEffect(() => {
-    if (user && !currentSessionId) {
+    if (user && !currentSessionId && messages.length === 0) {
       loadCredits();
       checkConnectedAccounts();
-      startNewChat();
+      // Only start new chat if no existing sessions
+      loadExistingChatOrStart();
     }
   }, [user]);
 
@@ -65,6 +66,31 @@ const AdAnalyticsChat = () => {
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const loadExistingChatOrStart = async () => {
+    try {
+      // Check if user has any existing sessions first
+      const { data: existingSessions, error: sessionError } = await supabase
+        .from('chat_sessions')
+        .select('id, updated_at')
+        .eq('user_id', user?.id)
+        .order('updated_at', { ascending: false })
+        .limit(1);
+
+      if (sessionError) throw sessionError;
+
+      if (existingSessions && existingSessions.length > 0) {
+        // Load the most recent session
+        await loadChatSession(existingSessions[0].id);
+      } else {
+        // No existing sessions, start new chat
+        await startNewChat();
+      }
+    } catch (error) {
+      console.error('Error loading existing chat:', error);
+      await startNewChat(); // Fallback to new chat
+    }
   };
 
   const startNewChat = async () => {
