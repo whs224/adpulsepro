@@ -1,5 +1,8 @@
 
-project_id = "default"
+project_id = "gkhldflxtvrsnidxbqzp"
 
 [functions.generate-report]
 verify_jwt = false
+
+[functions.generate-chat-title]
+verify_jwt = true
