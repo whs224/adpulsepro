@@ -120,9 +120,15 @@ const ChatHistory = ({ currentSessionId, onSessionSelect, onNewChat, onSessionUp
     }
   };
 
-  // Refresh sessions when parent requests update
+  // Refresh sessions when parent requests update with debouncing to prevent flickering
   useEffect(() => {
-    loadChatSessions();
+    const timeoutId = setTimeout(() => {
+      if (onSessionUpdate) {
+        loadChatSessions();
+      }
+    }, 200);
+
+    return () => clearTimeout(timeoutId);
   }, [onSessionUpdate]);
 
   return (

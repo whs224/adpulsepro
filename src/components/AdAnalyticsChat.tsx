@@ -382,7 +382,7 @@ const AdAnalyticsChat = () => {
   }
 
   return (
-    <div className="flex gap-6 h-[700px] max-w-7xl mx-auto">
+    <div className="flex gap-6 h-full max-w-7xl mx-auto">
       {/* Chat History Sidebar */}
       <div className="w-80 flex-shrink-0">
         <ChatHistory

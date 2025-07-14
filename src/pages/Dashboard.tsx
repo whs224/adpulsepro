@@ -62,10 +62,14 @@ const Dashboard = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 max-w-md">
+          <TabsList className="grid w-full grid-cols-3 max-w-lg">
             <TabsTrigger value="chat" className="flex items-center gap-2">
               <MessageCircle className="h-4 w-4" />
               AI Chat
+            </TabsTrigger>
+            <TabsTrigger value="performance" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Ad Performance
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
@@ -74,18 +78,20 @@ const Dashboard = () => {
           </TabsList>
 
           <TabsContent value="chat" className="space-y-6">
-            <Card>
+            <Card className="h-[800px]">
               <CardHeader>
                 <CardTitle>Chat with AI Assistant</CardTitle>
                 <CardDescription>
                   Ask questions about your ad performance in plain English
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="h-full">
                 <AdAnalyticsChat />
               </CardContent>
             </Card>
-            
+          </TabsContent>
+
+          <TabsContent value="performance" className="space-y-6">
             <AdDataDashboard goToAccountsTab={goToAccountsTab} />
           </TabsContent>
 
