@@ -28,7 +28,7 @@ const AdAnalyticsChat = () => {
   const { user } = useAuth();
 
   useEffect(() => {
-    if (user) {
+    if (user && !currentSessionId) {
       loadCredits();
       checkConnectedAccounts();
       startNewChat();
@@ -68,6 +68,8 @@ const AdAnalyticsChat = () => {
   };
 
   const startNewChat = async () => {
+    if (currentSessionId) return; // Prevent creating multiple sessions
+    
     try {
       // Create a new chat session
       const { data: session, error } = await supabase
@@ -337,6 +339,7 @@ const AdAnalyticsChat = () => {
   };
 
   const handleNewChat = () => {
+    setCurrentSessionId(null); // Clear current session first
     startNewChat();
   };
 
