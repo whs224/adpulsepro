@@ -369,6 +369,81 @@ const AdAnalyticsChat = () => {
     startNewChat();
   };
 
+  const formatMessageContent = (content: string, messageType: 'user' | 'ai') => {
+    return content.split('\n').map((line, index) => {
+      // Clean up markdown formatting
+      let cleanLine = line;
+      
+      // Remove markdown headers but keep the text as bold headings
+      if (line.startsWith('###')) {
+        const headerText = line.replace(/^###\s*/, '').trim();
+        return headerText ? (
+          <h3 key={index} className={`text-lg font-bold mt-4 mb-2 ${messageType === 'user' ? 'text-white' : 'text-gray-900'}`}>
+            {headerText}
+          </h3>
+        ) : null;
+      } else if (line.startsWith('##')) {
+        const headerText = line.replace(/^##\s*/, '').trim();
+        return headerText ? (
+          <h2 key={index} className={`text-xl font-bold mt-4 mb-2 ${messageType === 'user' ? 'text-white' : 'text-gray-900'}`}>
+            {headerText}
+          </h2>
+        ) : null;
+      }
+      
+      // Remove bullet points but keep as list items
+      if (line.startsWith('- ')) {
+        const listText = line.replace(/^-\s*/, '').trim();
+        return listText ? (
+          <li key={index} className={`ml-4 list-disc mb-1 ${messageType === 'user' ? 'text-blue-100' : 'text-gray-700'}`}>
+            {listText}
+          </li>
+        ) : null;
+      }
+      
+      // Remove bold markdown but keep text bold
+      if (line.match(/^\*\*.*\*\*$/)) {
+        const boldText = line.replace(/\*\*/g, '').trim();
+        return boldText ? (
+          <p key={index} className={`font-semibold mb-2 ${messageType === 'user' ? 'text-white' : 'text-gray-900'}`}>
+            {boldText}
+          </p>
+        ) : null;
+      }
+      
+      // Handle inline bold text
+      if (line.includes('**')) {
+        const parts = line.split(/(\*\*[^*]+\*\*)/);
+        return (
+          <p key={index} className={`mb-2 leading-relaxed ${messageType === 'user' ? 'text-white' : 'text-gray-800'}`}>
+            {parts.map((part, partIndex) => {
+              if (part.startsWith('**') && part.endsWith('**')) {
+                const boldText = part.replace(/\*\*/g, '');
+                return (
+                  <span key={partIndex} className="font-semibold">
+                    {boldText}
+                  </span>
+                );
+              }
+              return part;
+            })}
+          </p>
+        );
+      }
+      
+      // Regular text
+      if (line.trim()) {
+        return (
+          <p key={index} className={`mb-2 leading-relaxed ${messageType === 'user' ? 'text-white' : 'text-gray-800'}`}>
+            {line}
+          </p>
+        );
+      }
+      
+      return <br key={index} />;
+    }).filter(Boolean);
+  };
+
   if (!user) {
     return (
       <Card className="max-w-2xl mx-auto">
@@ -448,20 +523,7 @@ const AdAnalyticsChat = () => {
                           : 'bg-white text-gray-800 border border-gray-100'
                       }`}>
                         <div className="prose prose-sm max-w-none">
-                          {message.content.split('\n').map((line, index) => {
-                            if (line.startsWith('###')) {
-                              return <h3 key={index} className={`text-lg font-semibold mt-3 mb-2 ${message.type === 'user' ? 'text-white' : 'text-gray-900'}`}>{line.replace('###', '').trim()}</h3>;
-                            } else if (line.startsWith('##')) {
-                              return <h2 key={index} className={`text-xl font-bold mt-4 mb-2 ${message.type === 'user' ? 'text-white' : 'text-gray-900'}`}>{line.replace('##', '').trim()}</h2>;
-                            } else if (line.startsWith('- ')) {
-                              return <li key={index} className={`ml-4 list-disc ${message.type === 'user' ? 'text-blue-100' : 'text-gray-700'}`}>{line.replace('- ', '')}</li>;
-                            } else if (line.startsWith('**') && line.endsWith('**')) {
-                              return <p key={index} className={`font-semibold ${message.type === 'user' ? 'text-white' : 'text-gray-900'}`}>{line.replace(/\*\*/g, '')}</p>;
-                            } else if (line.trim()) {
-                              return <p key={index} className={`mb-2 leading-relaxed ${message.type === 'user' ? 'text-white' : 'text-gray-800'}`}>{line}</p>;
-                            }
-                            return <br key={index} />;
-                          })}
+                          {formatMessageContent(message.content, message.type)}
                         </div>
                       </div>
                       <p className={`text-xs text-gray-500 mt-2 opacity-70 ${
