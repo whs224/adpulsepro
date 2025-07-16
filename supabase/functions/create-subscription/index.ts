@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
@@ -9,22 +10,20 @@ const corsHeaders = {
 
 const pricingPlans = {
   starter: {
-    priceId: "price_1RIPJeCr6IHSKbXh9XgQJxjt", // Live Starter price ID
+    // Using test mode price - you'll need to create actual prices in your Stripe dashboard
+    price: 2900, // $29.00 in cents
     credits: 100,
     maxTeamMembers: 1,
-    price: 29
   },
   growth: {
-    priceId: "price_1RIPJoCr6IHSKbXh2ZfamqvN", // Live Growth price ID
+    price: 7900, // $79.00 in cents
     credits: 500,
     maxTeamMembers: 3,
-    price: 79
   },
   scale: {
-    priceId: "price_1RIPJZCr6IHSKbXh1ZGj7eU4", // Live Scale price ID
+    price: 19900, // $199.00 in cents
     credits: 2000,
     maxTeamMembers: 10,
-    price: 199
   }
 };
 
@@ -85,12 +84,22 @@ serve(async (req) => {
       customerId = customer.id;
     }
 
-    // Create subscription checkout session
+    // Create subscription checkout session with inline price data
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       line_items: [
         {
-          price: plan.priceId,
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: `AdPulse ${planName.charAt(0).toUpperCase() + planName.slice(1)} Plan`,
+              description: `${plan.credits} AI messages per month, up to ${plan.maxTeamMembers} team member${plan.maxTeamMembers > 1 ? 's' : ''}`
+            },
+            unit_amount: plan.price,
+            recurring: {
+              interval: "month"
+            }
+          },
           quantity: 1,
         },
       ],
@@ -124,4 +133,4 @@ serve(async (req) => {
       status: 500,
     });
   }
-}); 
+});
