@@ -370,77 +370,49 @@ const AdAnalyticsChat = () => {
   };
 
   const formatMessageContent = (content: string, messageType: 'user' | 'ai') => {
-    return content.split('\n').map((line, index) => {
-      // Clean up markdown formatting
-      let cleanLine = line;
+    // Clean up the content by removing all markdown symbols
+    let cleanContent = content;
+    
+    // Remove markdown headers completely and replace with clean text
+    cleanContent = cleanContent.replace(/^#{1,6}\s*/gm, '');
+    
+    // Remove all bold markdown (**text**)
+    cleanContent = cleanContent.replace(/\*\*(.*?)\*\*/g, '$1');
+    
+    // Remove numbered lists (1. 2. etc.)
+    cleanContent = cleanContent.replace(/^\d+\.\s*/gm, '• ');
+    
+    // Remove bullet points but keep the content
+    cleanContent = cleanContent.replace(/^[-*+]\s*/gm, '• ');
+    
+    // Remove markdown links [text](url) and keep just the text
+    cleanContent = cleanContent.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+    
+    // Split into lines and format
+    return cleanContent.split('\n').map((line, index) => {
+      const trimmedLine = line.trim();
       
-      // Remove markdown headers but keep the text as bold headings
-      if (line.startsWith('###')) {
-        const headerText = line.replace(/^###\s*/, '').trim();
-        return headerText ? (
-          <h3 key={index} className={`text-lg font-bold mt-4 mb-2 ${messageType === 'user' ? 'text-white' : 'text-gray-900'}`}>
-            {headerText}
-          </h3>
-        ) : null;
-      } else if (line.startsWith('##')) {
-        const headerText = line.replace(/^##\s*/, '').trim();
-        return headerText ? (
-          <h2 key={index} className={`text-xl font-bold mt-4 mb-2 ${messageType === 'user' ? 'text-white' : 'text-gray-900'}`}>
-            {headerText}
-          </h2>
-        ) : null;
+      if (!trimmedLine) {
+        return <br key={index} />;
       }
       
-      // Remove bullet points but keep as list items
-      if (line.startsWith('- ')) {
-        const listText = line.replace(/^-\s*/, '').trim();
-        return listText ? (
-          <li key={index} className={`ml-4 list-disc mb-1 ${messageType === 'user' ? 'text-blue-100' : 'text-gray-700'}`}>
-            {listText}
-          </li>
-        ) : null;
-      }
-      
-      // Remove bold markdown but keep text bold
-      if (line.match(/^\*\*.*\*\*$/)) {
-        const boldText = line.replace(/\*\*/g, '').trim();
-        return boldText ? (
-          <p key={index} className={`font-semibold mb-2 ${messageType === 'user' ? 'text-white' : 'text-gray-900'}`}>
-            {boldText}
-          </p>
-        ) : null;
-      }
-      
-      // Handle inline bold text
-      if (line.includes('**')) {
-        const parts = line.split(/(\*\*[^*]+\*\*)/);
+      // Handle bullet points
+      if (trimmedLine.startsWith('• ')) {
+        const listText = trimmedLine.replace('• ', '');
         return (
-          <p key={index} className={`mb-2 leading-relaxed ${messageType === 'user' ? 'text-white' : 'text-gray-800'}`}>
-            {parts.map((part, partIndex) => {
-              if (part.startsWith('**') && part.endsWith('**')) {
-                const boldText = part.replace(/\*\*/g, '');
-                return (
-                  <span key={partIndex} className="font-semibold">
-                    {boldText}
-                  </span>
-                );
-              }
-              return part;
-            })}
-          </p>
+          <div key={index} className={`flex items-start mb-2 ${messageType === 'user' ? 'text-white' : 'text-gray-800'}`}>
+            <span className="mr-2 mt-1 text-blue-500">•</span>
+            <span className="leading-relaxed">{listText}</span>
+          </div>
         );
       }
       
-      // Regular text
-      if (line.trim()) {
-        return (
-          <p key={index} className={`mb-2 leading-relaxed ${messageType === 'user' ? 'text-white' : 'text-gray-800'}`}>
-            {line}
-          </p>
-        );
-      }
-      
-      return <br key={index} />;
+      // Regular paragraph
+      return (
+        <p key={index} className={`mb-3 leading-relaxed ${messageType === 'user' ? 'text-white' : 'text-gray-800'}`}>
+          {trimmedLine}
+        </p>
+      );
     }).filter(Boolean);
   };
 
@@ -529,7 +501,7 @@ const AdAnalyticsChat = () => {
                       <p className={`text-xs text-gray-500 mt-2 opacity-70 ${
                         message.type === 'user' ? 'text-right' : 'text-left'
                       }`}>
-                        {message.timestamp.toLocaleTimeString()}
+                        {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
                   </div>
