@@ -82,6 +82,8 @@ const platformConfig = {
 const ConnectedAccountsList = () => {
   const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccount[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [selectedPlatform, setSelectedPlatform] = useState<string>('');
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -127,9 +129,33 @@ const ConnectedAccountsList = () => {
       return;
     }
 
+    // Show verification modal for Google platforms
+    if (platformKey === 'google_ads') {
+      setSelectedPlatform(platformKey);
+      setShowVerificationModal(true);
+      return;
+    }
+
+    // Direct connection for other platforms
     try {
       console.log(`Connecting to ${platformConfig[platformKey as keyof typeof platformConfig]?.name}...`);
       initiateOAuth(platformKey);
+    } catch (error: unknown) {
+      console.error('OAuth initiation failed:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to initiate connection. Please try again.';
+      toast({
+        title: "Connection Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const proceedWithConnection = () => {
+    setShowVerificationModal(false);
+    try {
+      console.log(`Connecting to ${platformConfig[selectedPlatform as keyof typeof platformConfig]?.name}...`);
+      initiateOAuth(selectedPlatform);
     } catch (error: unknown) {
       console.error('OAuth initiation failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to initiate connection. Please try again.';
@@ -305,6 +331,13 @@ const ConnectedAccountsList = () => {
           <p className="text-gray-600">All available platforms are connected!</p>
         </div>
       )}
+
+      <OAuthVerificationModal
+        isOpen={showVerificationModal}
+        onClose={() => setShowVerificationModal(false)}
+        onProceed={proceedWithConnection}
+        platform={platformConfig[selectedPlatform as keyof typeof platformConfig]?.name || selectedPlatform}
+      />
     </div>
   );
 };
