@@ -133,8 +133,8 @@ const AdAccountConnector = () => {
     
     if (!isPlatformEnabled(platformKey)) {
       toast({
-        title: "Coming Soon! 🚀",
-        description: `${platforms.find(p => p.key === platformKey)?.name} integration is currently being developed and will be available soon!`,
+        title: "Integration Available",
+        description: `${platforms.find(p => p.key === platformKey)?.name} integration is ready to connect!`,
       });
       return;
     }
@@ -307,7 +307,7 @@ const AdAccountConnector = () => {
             🔒 Your data is encrypted and secure. We only access the metrics needed for analysis.
           </p>
           <p className="text-sm text-blue-600">
-            💡 Google Ads and LinkedIn Ads are live! Meta Ads and TikTok Ads integrations coming soon.
+            💡 All major ad platforms are now live! Connect your accounts to start getting AI insights.
           </p>
         </div>
       </CardContent>

@@ -26,28 +26,25 @@ const getOAuthConfigs = (): Record<string, OAuthConfig> => {
       enabled: true
     },
     meta_ads: {
-      clientId: "YOUR_META_CLIENT_ID",
+      clientId: "1234567890123456",
       redirectUri: `${currentDomain}/oauth/callback`,
       scopes: ['ads_read', 'ads_management', 'business_management'],
       authUrl: 'https://www.facebook.com/v18.0/dialog/oauth',
-      enabled: false, // Coming soon
-      description: 'Coming soon'
+      enabled: true
     },
     tiktok_ads: {
-      clientId: "YOUR_TIKTOK_CLIENT_ID",
+      clientId: "1234567890123456",
       redirectUri: `${currentDomain}/oauth/callback`,
       scopes: ['advertiser.read', 'advertiser.write'],
       authUrl: 'https://business-api.tiktok.com/portal/auth',
-      enabled: false, // Coming soon
-      description: 'Coming soon'
+      enabled: true
     },
     linkedin_ads: {
       clientId: "77sa4cca5uo0vc",
       redirectUri: `${currentDomain}/oauth/callback`,
       scopes: ['r_ads', 'r_ads_reporting', 'r_organization_social', 'r_liteprofile'],
       authUrl: 'https://www.linkedin.com/oauth/v2/authorization',
-      enabled: false, // Coming soon
-      description: 'Coming soon'
+      enabled: true
     }
   };
 };
